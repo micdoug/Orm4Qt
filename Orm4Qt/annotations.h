@@ -1,0 +1,4 @@
+#ifndef ANNOTATIONS_H
+#define ANNOTATIONS_H
+
+#endif // ANNOTATIONS_H
