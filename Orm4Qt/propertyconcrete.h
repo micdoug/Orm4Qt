@@ -3,6 +3,7 @@
 
 #include "property.h"
 #include <functional>
+#include <type_traits>
 
 using namespace std;
 
@@ -39,6 +40,14 @@ namespace Orm4Qt
             {
                 throw new std::bad_cast();
             }
+        }
+        virtual int type() const override
+        {
+            return qMetaTypeId<T>();
+        }
+        virtual bool isPointer() const override
+        {
+            return false;
         }
 
     private:
@@ -85,6 +94,14 @@ namespace Orm4Qt
             {
                 throw new std::bad_cast();
             }
+        }
+        virtual int type() const override
+        {
+            return qMetaTypeId<T>();
+        }
+        virtual bool isPointer() const override
+        {
+            return true;
         }
 
     private:

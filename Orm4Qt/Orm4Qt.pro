@@ -14,15 +14,19 @@ CONFIG += c++11
 
 SOURCES += \
     reflect.cpp \
-    property.cpp
+    property.cpp \
+    log.cpp
 
 HEADERS += \
     reflect.h \
     property.h \
     propertyconcrete.h \
     class.h \
-    annotations.h
+    annotations.h \
+    log.h
 unix {
     target.path = /usr/lib
     INSTALLS += target
 }
+
+#DEFINES += ORM4QT_DEBUG_OL
