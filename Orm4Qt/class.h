@@ -31,7 +31,7 @@ namespace Orm4Qt
          * The list of tags used for initialization
          */
         explicit Class(const QList<Property*> &properties = QList<Property*>(), const QHash<QString, QVariant> &tags=QHash<QString, QVariant>())
-            : Reflect(tags), m_properties(properties), m_propertiesInitialized(true)
+            : Reflect(tags), m_properties(properties)
         {
             this->addTag("scope", Scope::Local);
         }
@@ -40,7 +40,7 @@ namespace Orm4Qt
          * @param other
          * The instance to be cloned
          */
-        Class(const Class &other) : Reflect(other), m_propertiesInitialized(false)//m_properties(other.properties())
+        Class(const Class &other) : Reflect(other) //m_properties(other.properties())
         {}
         /**
          * Destructor
@@ -141,14 +141,9 @@ namespace Orm4Qt
                 return false;
             }
         }
-        bool propertiesInitialized() const
-        {
-            return m_propertiesInitialized;
-        }
 #endif
     private:
         QList<Property*> m_properties;
-        bool m_propertiesInitialized;
 
     };
 }

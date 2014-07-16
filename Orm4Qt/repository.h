@@ -408,8 +408,10 @@ namespace Orm4Qt
                 m_lastError = m_provider->lastError();
                 return false;
             }
+#ifdef ORM4QT_DEBUG_SL
             //Debug the sql generated
             qCDebug(ORM4QT_SL) << getLastExecutedQuery(*query.get());
+#endif
             //Try to execute the query
             if(query->exec())
             {

@@ -24,9 +24,13 @@
     public:\
     shared_ptr<Orm4Qt::Class> reflection()\
     {\
-        if(m_reflectionObject == nullptr) {\
+        if(m_reflectionObject == nullptr || m_reflectionObject.use_count()>1) {\
             DEBUG_CREATE_CLASS \
-            shared_ptr<Orm4Qt::Class> c(new Orm4Qt::Class());\
+            shared_ptr<Orm4Qt::Class> c;\
+            if(m_reflectionObject == nullptr) \
+                c = shared_ptr<Orm4Qt::Class>(new Orm4Qt::Class());\
+            else\
+                c = shared_ptr<Orm4Qt::Class>(new Orm4Qt::Class(*m_reflectionObject.get()));\
             Orm4Qt::Property *p = nullptr;
 
 #define ORM4QT_END \

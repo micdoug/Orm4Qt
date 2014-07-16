@@ -22,7 +22,8 @@ SOURCES += \
     testreflectclass.cpp \
     person.cpp \
     testreflectionsystem.cpp \
-    book.cpp
+    book.cpp \
+    usuario.cpp
 DEFINES += SRCDIR=\\\"$$PWD/\\\"
 
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../Orm4Qt/release/ -lOrm4Qt
@@ -45,4 +46,5 @@ HEADERS += \
     testreflectclass.h \
     person.h \
     testreflectionsystem.h \
-    book.h
+    book.h \
+    usuario.h

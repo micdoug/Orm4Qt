@@ -119,7 +119,7 @@ shared_ptr<QSqlQuery> SqliteProvider::generateUpdate(Class *reflect, const QList
             sql << prop->tags()["column"].toString()
                 << " = "
                 << prop->tags()["column"].toString().prepend(":")
-                << " ";
+                << ", ";
             QVariant value = prop->value();
             bindings.insert(prop->tags()["column"].toString().prepend(":"), value);
         }
@@ -133,16 +133,17 @@ shared_ptr<QSqlQuery> SqliteProvider::generateUpdate(Class *reflect, const QList
     }//End iterate over the fields
 
     //Add the new version
-    if(reflect->tags()["newversion"].isNull())
+    if(!reflect->tags()["newversion"].isNull())
     {
         sql << reflect->tags()["versioncolumn"].toString()
             << " = "
             << reflect->tags()["versioncolumn"].toString().prepend(":new")
-            << " ";
+            << ", ";
         bindings.insert(reflect->tags()["versioncolumn"].toString().prepend(":new"), reflect->tags()["newversion"]);
     }
 
     //Include the where clause
+    sqlstr = sqlstr.left(sqlstr.size()-2) + " ";
     sql << "WHERE ";
     //Add the autoid
     if(!reflect->tags()["autoid"].isNull())
@@ -150,7 +151,7 @@ shared_ptr<QSqlQuery> SqliteProvider::generateUpdate(Class *reflect, const QList
         sql << reflect->tags()["autoid"].toString()
             << " = "
             << reflect->tags()["autoid"].toString().prepend(":")
-            << " ";
+            << " AND ";
         bindings.insert(reflect->tags()["autoid"].toString().prepend(":"), reflect->tags()["id"]);
     }
 
@@ -160,7 +161,7 @@ shared_ptr<QSqlQuery> SqliteProvider::generateUpdate(Class *reflect, const QList
         sql << reflect->tags()["versioncolumn"].toString()
             << " = "
             << reflect->tags()["versioncolumn"].toString().prepend(":")
-            << " ";
+            << " AND ";
         bindings.insert(reflect->tags()["versioncolumn"].toString().prepend(":"), reflect->tags()["version"]);
     }
 
@@ -182,12 +183,13 @@ shared_ptr<QSqlQuery> SqliteProvider::generateUpdate(Class *reflect, const QList
                 sql << prop->tags()["column"].toString()
                     << " = "
                     << prop->tags()["column"].toString().prepend(":")
-                    << " ";
+                    << " AND ";
                 bindings.insert(prop->tags()["column"].toString().prepend(":"), prop->value());
             }
         }
     }//End iterating over the keys
 
+    sqlstr = sqlstr.left(sqlstr.size()-4);
     //Create the query object
     shared_ptr<QSqlQuery> query(new QSqlQuery(QSqlDatabase::database(databaseConnectionName())));
     //Testing query
@@ -346,7 +348,7 @@ shared_ptr<QSqlQuery> SqliteProvider::generateSelect(Class *reflect, const Where
                     bindings.insert(field, whereptr->arguments().first());
                     break;
                 case WhereOp::Contains:
-                    wherestr += QString("LIKE '%1%2%3' ").arg("%").arg(whereptr->arguments().first().toString()).arg("%");
+                    wherestr += QString("LIKE '%%1%' ").arg(whereptr->arguments().first().toString());
                     break;
                 case WhereOp::EndsWith:
                     wherestr += QString("LIKE '%1%2' ").arg("%").arg(whereptr->arguments().first().toString());
