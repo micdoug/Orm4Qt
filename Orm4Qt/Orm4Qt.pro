@@ -15,7 +15,11 @@ CONFIG += c++11
 SOURCES += \
     reflect.cpp \
     property.cpp \
-    log.cpp
+    log.cpp \
+    ormerror.cpp \
+    sqlprovider.cpp \
+    where.cpp \
+    sqliteprovider.cpp
 
 HEADERS += \
     reflect.h \
@@ -23,10 +27,16 @@ HEADERS += \
     propertyconcrete.h \
     class.h \
     annotations.h \
-    log.h
+    log.h \
+    ormerror.h \
+    sqlprovider.h \
+    where.h \
+    repository.h \
+    sqliteprovider.h
 unix {
     target.path = /usr/lib
     INSTALLS += target
 }
 
 #DEFINES += ORM4QT_DEBUG_OL
+DEFINES += ORM4QT_DEBUG_SL

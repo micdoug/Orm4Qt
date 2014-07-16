@@ -9,6 +9,12 @@
 
 namespace Orm4Qt
 {
+    enum Scope
+    {
+        Local = 0,
+        Remote = 1
+    };
+
     /**
      * Class used for storing metadata about classes. It provides an interface for access the properties of
      * the class
@@ -25,14 +31,16 @@ namespace Orm4Qt
          * The list of tags used for initialization
          */
         explicit Class(const QList<Property*> &properties = QList<Property*>(), const QHash<QString, QVariant> &tags=QHash<QString, QVariant>())
-            : Reflect(tags), m_properties(properties)
-        {}
+            : Reflect(tags), m_properties(properties), m_propertiesInitialized(true)
+        {
+            this->addTag("scope", Scope::Local);
+        }
         /**
          * Copy constructor
          * @param other
          * The instance to be cloned
          */
-        Class(const Class &other) : Reflect(other), m_properties(other.properties())
+        Class(const Class &other) : Reflect(other), m_propertiesInitialized(false)//m_properties(other.properties())
         {}
         /**
          * Destructor
@@ -133,9 +141,14 @@ namespace Orm4Qt
                 return false;
             }
         }
+        bool propertiesInitialized() const
+        {
+            return m_propertiesInitialized;
+        }
 #endif
     private:
         QList<Property*> m_properties;
+        bool m_propertiesInitialized;
 
     };
 }

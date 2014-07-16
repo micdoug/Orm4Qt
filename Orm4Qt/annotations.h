@@ -19,16 +19,21 @@
 #endif
 
 #define ORM4QT_BEGIN \
+    private: \
+    shared_ptr<Orm4Qt::Class> m_reflectionObject =  nullptr;\
     public:\
     shared_ptr<Orm4Qt::Class> reflection()\
     {\
-        DEBUG_CREATE_CLASS \
-        shared_ptr<Orm4Qt::Class> c(new Orm4Qt::Class());\
-        Orm4Qt::Property *p = nullptr;
+        if(m_reflectionObject == nullptr) {\
+            DEBUG_CREATE_CLASS \
+            shared_ptr<Orm4Qt::Class> c(new Orm4Qt::Class());\
+            Orm4Qt::Property *p = nullptr;
 
 #define ORM4QT_END \
         DEBUG_FINISH_CLASS \
-        return c;\
+        m_reflectionObject = c;\
+        }\
+        return m_reflectionObject;\
     }
 
 #define CLASS(...) c->addTagsFromString(#__VA_ARGS__);
