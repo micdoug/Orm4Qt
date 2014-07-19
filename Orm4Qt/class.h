@@ -142,6 +142,11 @@ namespace Orm4Qt
             }
         }
 #endif
+        void clearProperties()
+        {
+            qDeleteAll(m_properties.begin(), m_properties.end());
+            m_properties.clear();
+        }
     private:
         QList<Property*> m_properties;
 

@@ -18,6 +18,14 @@ SqliteProvider::~SqliteProvider()
 
 shared_ptr<QSqlQuery> SqliteProvider::generateInsert(Class *reflect, const QList<int> &fieldsno)
 {
+    //Check if there are fields to insert
+    if(fieldsno.isEmpty())
+    {
+        m_lastError = shared_ptr<OrmError>(new OrmError(ErrorType::InvalidRequest, QString("There aren't fields to insert. Check if the name of the fields informed are valid.")));
+        return nullptr;
+
+    }//End Check if there are fields to insert
+
     //Create the string to store the sql command
     QString sqlstr;
     QTextStream sql(&sqlstr);
@@ -41,7 +49,7 @@ shared_ptr<QSqlQuery> SqliteProvider::generateInsert(Class *reflect, const QList
         return nullptr;
     }//End add table name
 
-    shared_ptr<QSqlQuery> query(new QSqlQuery(QSqlDatabase::database(databaseConnectionName())));
+    //Add properties in the sql statemtent
     for(int index : fieldsno)
     {
         Property *prop = reflect->properties()[index];
@@ -58,38 +66,52 @@ shared_ptr<QSqlQuery> SqliteProvider::generateInsert(Class *reflect, const QList
             values << prop->tags()["column"].toString().prepend(":") << ", ";
             bindings.insert(prop->tags()["column"].toString().prepend(":"), prop->value());
         }
+    }//End add properties in the sql statement
 
-    }
     //Insert version column
-    QString versioncolumn = reflect->tags()["versioncolumn"].toString();
-    if(!versioncolumn.isEmpty())
+    if(!reflect->tags()["versioncolumn"].isNull())
     {
+        QString versioncolumn = reflect->tags()["versioncolumn"].toString();
         columns << versioncolumn << ", ";
         values << ":" << versioncolumn << ", ";
         bindings.insert(versioncolumn.prepend(":"), reflect->tags()["version"]);
-    }
+    }//End insert version column
+
+    //Combine sql statement with columns and values
     sql << columnsstr.left(columnsstr.size()-2) << ") VALUES(";
     sql << valuesstr.left(valuesstr.size()-2) << ");";
+    //End combine sql statement with columns and values
 
-
-    //Testing query
+    //Create and validate query
+    shared_ptr<QSqlQuery> query(new QSqlQuery(QSqlDatabase::database(databaseConnectionName())));
     if(query->prepare(sqlstr))
     {
+        //Bind values of the insert
         for(auto iter=bindings.begin(); iter!=bindings.end(); ++iter)
         {
             query->bindValue(iter.key(), iter.value());
-        }
+        }//End bind values of the insert
+
+        //Return the query object
         return query;
     }
     else
     {
         m_lastError = shared_ptr<OrmError>(new OrmError(ErrorType::DatabaseError, QString("Invalid SQL statement for insert a row. See the sqlerror attached."), query->lastError()));
         return nullptr;
-    }
+    }//End create and validate query
 }
 
 shared_ptr<QSqlQuery> SqliteProvider::generateUpdate(Class *reflect, const QList<int> &fieldsno)
 {
+    //Check if there are fields to update
+    if(fieldsno.isEmpty())
+    {
+        m_lastError = shared_ptr<OrmError>(new OrmError(ErrorType::InvalidRequest, QString("There aren't fields to update. Check if the name of the fields informed are valid. In the update operation the autoid, autocolumn and primary keys properties are ignored.")));
+        return nullptr;
+
+    }//End Check if there are fields to update
+
     //Objects to store the sql command
     QString sqlstr;
     QTextStream sql(&sqlstr);
@@ -140,7 +162,7 @@ shared_ptr<QSqlQuery> SqliteProvider::generateUpdate(Class *reflect, const QList
             << reflect->tags()["versioncolumn"].toString().prepend(":new")
             << ", ";
         bindings.insert(reflect->tags()["versioncolumn"].toString().prepend(":new"), reflect->tags()["newversion"]);
-    }
+    }//End add the new version
 
     //Include the where clause
     sqlstr = sqlstr.left(sqlstr.size()-2) + " ";
@@ -165,12 +187,12 @@ shared_ptr<QSqlQuery> SqliteProvider::generateUpdate(Class *reflect, const QList
         bindings.insert(reflect->tags()["versioncolumn"].toString().prepend(":"), reflect->tags()["version"]);
     }
 
-    QString autocolumn = reflect->tags()["autocolumn"].toString();
+    //QString autocolumn = reflect->tags()["autocolumn"].toString();
 
     //Iterating over the keys
     for(Property *prop: reflect->properties())
     {
-        if(prop->tags()["key"].toBool() || (!autocolumn.isNull() && prop->tags()["name"].toString()==autocolumn))
+        if(prop->tags()["key"].toBool()) // || (!autocolumn.isNull() && prop->tags()["name"].toString()==autocolumn))
         {
             if(prop->tags()["column"].isNull())
             {
@@ -210,7 +232,89 @@ shared_ptr<QSqlQuery> SqliteProvider::generateUpdate(Class *reflect, const QList
 
 shared_ptr<QSqlQuery> SqliteProvider::generateDelete(Class *reflect)
 {
-    return nullptr;
+    //Objects to store the sql command
+    QString sqlstr;
+    QTextStream sql(&sqlstr);
+
+    //Begin the sql command
+    sql << "DELETE FROM ";
+
+    //Add the table name
+    if(!reflect->tags()["table"].isNull())
+    {
+        sql << reflect->tags()["table"].toString() << " WHERE ";
+    }
+    else
+    {
+        m_lastError = shared_ptr<OrmError>(new OrmError(ErrorType::ConfigurationError, QString("The tag 'table' was not supplied for the class '%1'.").arg(reflect->tags()["name"].toString())));
+        return nullptr;
+    }//End add the table name
+
+    //Object to store the bindings
+    QMap<QString, QVariant> bindings;
+
+    //Add the autoid
+    if(!reflect->tags()["autoid"].isNull())
+    {
+        sql << reflect->tags()["autoid"].toString()
+            << " = "
+            << reflect->tags()["autoid"].toString().prepend(":")
+            << " AND ";
+        bindings.insert(reflect->tags()["autoid"].toString().prepend(":"), reflect->tags()["id"]);
+    }
+
+    //Add the version check
+    if(!reflect->tags()["versioncolumn"].isNull())
+    {
+        sql << reflect->tags()["versioncolumn"].toString()
+            << " = "
+            << reflect->tags()["versioncolumn"].toString().prepend(":")
+            << " AND ";
+        bindings.insert(reflect->tags()["versioncolumn"].toString().prepend(":"), reflect->tags()["version"]);
+    }
+
+    //QString autocolumn = reflect->tags()["autocolumn"].toString();
+
+    //Iterating over the keys
+    for(Property *prop: reflect->properties())
+    {
+        if(prop->tags()["key"].toBool()) // || (!autocolumn.isNull() && prop->tags()["name"].toString()==autocolumn))
+        {
+            if(prop->tags()["column"].isNull())
+            {
+                m_lastError = shared_ptr<OrmError>(new OrmError(ErrorType::ConfigurationError, QString("The tag 'column' was not supplied for the property '%1' in the class '%2'.")
+                                                                .arg(prop->tags()["name"].toString())
+                                                                .arg(reflect->tags()["name"].toString())));
+            }
+            else
+            {
+                sql << prop->tags()["column"].toString()
+                    << " = "
+                    << prop->tags()["column"].toString().prepend(":")
+                    << " AND ";
+                QVariant v = prop->value();
+                bindings.insert(prop->tags()["column"].toString().prepend(":"), prop->value());
+            }
+        }
+    }//End iterating over the keys
+
+    sqlstr = sqlstr.left(sqlstr.size()-4);
+    //Create the query object
+    shared_ptr<QSqlQuery> query(new QSqlQuery(QSqlDatabase::database(databaseConnectionName())));
+    //Testing query
+    if(query->prepare(sqlstr))
+    {
+        for(auto iter=bindings.begin(); iter!=bindings.end(); ++iter)
+        {
+            query->bindValue(iter.key(), iter.value());
+        }
+        return query;
+    }
+    else
+    {
+        m_lastError = shared_ptr<OrmError>(new OrmError(ErrorType::DatabaseError, QString("Invalid SQL statement for delete a row. See the sqlerror attached."), query->lastError()));
+        return nullptr;
+    }
 }
 
 shared_ptr<QSqlQuery> SqliteProvider::generateSelect(Class *reflect, const Where &where, const QList<int> &fieldsno)

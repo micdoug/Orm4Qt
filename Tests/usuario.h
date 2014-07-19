@@ -9,6 +9,7 @@ class Usuario
 {
 public:
     Usuario();
+    Usuario(const Usuario &other) = default;
 
     QString nome() const;
     void setNome(const QString &nome);
@@ -34,11 +35,11 @@ private:
 
     ORM4QT_BEGIN
         CLASS(name="Usuario", table="Usuarios", autocolumn="Codigo")
-        PROPERTY(m_nome, name="Nome", column="nome")
+        PROPERTY(m_nome, name="Nome", column="name")
         PROPERTY(m_email, name="Email", column="email", unique=true)
-        PROPERTY(m_codigo, name="Codigo", column="codigo")
-        PROPERTY(m_pontos, name="Pontos", column="pontos")
-        PROPERTY(m_inscrito, name="Inscrito", column="data_inscricao")
+        PROPERTY(m_codigo, name="Codigo", key=true, column="code")
+        PROPERTY(m_pontos, name="Pontos", column="points")
+        PROPERTY(m_inscrito, name="Inscrito", column="subscribe")
     ORM4QT_END
 };
 

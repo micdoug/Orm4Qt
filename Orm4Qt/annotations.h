@@ -24,30 +24,32 @@
     public:\
     shared_ptr<Orm4Qt::Class> reflection()\
     {\
-        if(m_reflectionObject == nullptr || m_reflectionObject.use_count()>1) {\
-            DEBUG_CREATE_CLASS \
-            shared_ptr<Orm4Qt::Class> c;\
-            if(m_reflectionObject == nullptr) \
-                c = shared_ptr<Orm4Qt::Class>(new Orm4Qt::Class());\
-            else\
-                c = shared_ptr<Orm4Qt::Class>(new Orm4Qt::Class(*m_reflectionObject.get()));\
-            Orm4Qt::Property *p = nullptr;
+        DEBUG_CREATE_CLASS \
+        if(m_reflectionObject.use_count()>1)\
+            m_reflectionObject = shared_ptr<Orm4Qt::Class>(new Orm4Qt::Class(*m_reflectionObject.get()));\
+        else if(m_reflectionObject == nullptr) {\
+            m_reflectionObject = shared_ptr<Orm4Qt::Class>(new Orm4Qt::Class());
 
 #define ORM4QT_END \
         DEBUG_FINISH_CLASS \
-        m_reflectionObject = c;\
-        }\
         return m_reflectionObject;\
     }
 
-#define CLASS(...) c->addTagsFromString(#__VA_ARGS__);
+#define CLASS(...) \
+        m_reflectionObject->addTagsFromString(#__VA_ARGS__); \
+    }\
+    else \
+    {\
+        return m_reflectionObject; \
+    }\
+    Orm4Qt::Property *p = nullptr;
 
 #define PROPERTY(NAME, ...) \
     DEBUG_CREATE_PROPERTY(NAME) \
     p = new Orm4Qt::PropertyConcrete<decltype(NAME)>(std::bind(std::mem_fn(&std::remove_pointer<decltype(this)>::type::NAME), this)); \
     p->addTagsFromString(#__VA_ARGS__); \
     p->addTag("name", #NAME); \
-    c->addProperty(p);\
+    m_reflectionObject->addProperty(p);\
     DEBUG_FINISH_PROPERTY(NAME)
 
 #endif // ANNOTATIONS_H

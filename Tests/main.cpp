@@ -8,8 +8,12 @@
 #include "usuario.h"
 
 #include <QFile>
+#include <QTextStream>
 
 using namespace std;
+
+QTextStream cin(stdin, QIODevice::ReadOnly);
+QTextStream cout(stdout, QIODevice::WriteOnly);
 
 void teste(Book b)
 {
@@ -31,102 +35,92 @@ int main(int argc, char **argv)
    QTest::qExec(treflectionsystem);
    delete treflectionsystem;*/
 
-    Repository::registerProvider(new SqliteProvider("Teste.db"));
+   Repository::registerProvider(new SqliteProvider("Teste.sqlite"));
+   auto repository = Repository::createRepository();
 
-    auto repository = Repository::createRepository();
+//   if(repository->createTable<Usuario>())
+//   {
+//       qDebug() << "Tabela criada com sucesso!";
+//   }
+//   else
+//   {
+//       qDebug() << "Erro na criação da tabela.";
+//       qDebug() << repository->lastError()->description();
+//       if(repository->lastError()->errorType() == DatabaseError)
+//       {
+//           qDebug() << repository->lastError()->sqlError().text();
+//       }
+//   }
 
-    QList<Usuario> usuarios;
-    if(repository->select<Usuario>(usuarios, Where("Nome", WhereOp::StartsWith, {"M"}, WherePrecede::Begin).
-                                   And(Where("Email", WhereOp::Contains, {"2"}, WherePrecede::End)).
-                                   Or(Where("Codigo", WhereOp::In, {1, 2, 3}))))
-    {
-        for(Usuario user: usuarios)
-        {
-            qDebug() << QString("%1 \t %2 \t %3").arg(user.codigo())
-                        .arg(user.nome()).arg(user.email());
-            user.setPontos(15.75);
-            if(repository->saveObject<Usuario>(user))
+//   return 0;
+
+   Usuario usuario;
+   usuario.setNome("Michael");
+   usuario.setEmail("michael");
+   usuario.setInscrito(QDate::currentDate());
+   repository->saveObject<Usuario>(usuario);
+
+   QList<Usuario> usuarios;
+   if(repository->select<Usuario>(usuarios))
+   {
+       for(int i=0; i<usuarios.count(); ++i)
+       {
+            Usuario& usuario = usuarios[i];
+            qDebug() << QString("%1 - %2").arg(usuario.codigo()).arg(usuario.nome());
+            if(repository->deleteObject<Usuario>(usuario))
             {
-                qDebug() << "Registro atualizado";
+                qDebug() << "Usuario deletado";
             }
             else
             {
+                qDebug() << "Erro na deleção";
                 qDebug() << repository->lastError()->description();
-                if(repository->lastError()->errorType() == ErrorType::DatabaseError)
+                if(repository->lastError()->errorType() == DatabaseError)
+                {
                     qDebug() << repository->lastError()->sqlError().text();
+                }
             }
-        }
-    }
-    else
-    {
-        qDebug() << repository->lastError()->description();
-        if(repository->lastError()->errorType() == ErrorType::DatabaseError)
-            qDebug() << repository->lastError()->sqlError().text();
-    }
-
-    /*if(repository->createTable<Book>())
-    {
-        qDebug() << "Table created.";
-    }
-    else
-    {
-        qDebug() << repository->lastError()->description();
-        qDebug() << repository->lastError()->sqlError().text();
-    }*/
-    /*QFile file("E:/Usuarios/michael/Pictures/Unix.png");
-    if(file.open(QIODevice::ReadOnly))
-    {
-        b.setPhoto(file.readAll());
-        b.setName("The C++ Programming Language");
-        b.setEdition(4);
-        b.setPublished(QDateTime::currentDateTime());
-        if(repository->saveObject<Book>(b))
-        {
-            qDebug() << "Object saved";
-            qDebug() << b.reflection()->tags()["id"];
-        }
-        else
-        {
-            qDebug() << repository->lastError()->description();
-            qDebug() << repository->lastError()->sqlError().text();
-        }
-    }
-    else
-    {
-        qDebug() << "Cannot open the file.";
-    }
-    QList<Book> list;
-    if(repository->select(list, Where("Name", WhereOp::StartsWith, {"t"})))
-    {
-        qDebug() << "Select Ok";
-        Book book = list.first();
-//        book.setPhoto(list.first().photo());
-//        book.setName("teste");
-//        book.setPublished(QDateTime::currentDateTime());
-//        if(!repository->saveObject<Book>(book))
-//        {
-//            qDebug() << repository->lastError()->description();
-//            if(repository->lastError()->errorType() == ErrorType::DatabaseError)
-//                qDebug() << repository->lastError()->sqlError().text();
-//        }
-        book.setName("The new book");
-        if(repository->saveObject<Book>(book))
-        {
-            qDebug() << "Ok";
-        }
-        else
-        {
-            qDebug() << repository->lastError()->description();
-        }
-
-    }
-    else
-    {
-        qDebug() << repository->lastError()->description();
-        qDebug() << repository->lastError()->sqlError().text();
-    }*/
-
-
+            if(repository->saveObject<Usuario>(usuario))
+            {
+                qDebug() << "Usuário recriado";
+                qDebug() << QString("%1 - %2").arg(usuario.codigo()).arg(usuario.nome());
+            }
+            else
+            {
+                qDebug() << "Erro na recriação";
+                qDebug() << repository->lastError()->description();
+                if(repository->lastError()->errorType() == DatabaseError)
+                {
+                    qDebug() << repository->lastError()->sqlError().text();
+                }
+            }
+            usuario.setNome("Geralda");
+            if(repository->saveObject<Usuario>(usuario))
+            {
+                qDebug() << "Usuário mudado";
+                qDebug() << QString("%1 - %2").arg(usuario.codigo()).arg(usuario.nome());
+            }
+            else
+            {
+                qDebug() << "Erro na recriação";
+                qDebug() << repository->lastError()->description();
+                if(repository->lastError()->errorType() == DatabaseError)
+                {
+                    qDebug() << repository->lastError()->sqlError().text();
+                }
+            }
+       }
+   }
+   else
+   {
+       qDebug() << "Erro na criação da tabela.";
+       qDebug() << repository->lastError()->description();
+       if(repository->lastError()->errorType() == DatabaseError)
+       {
+           qDebug() << repository->lastError()->sqlError().text();
+       }
+   }
 
    return 0;
+
 }
