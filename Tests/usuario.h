@@ -9,7 +9,6 @@ class Usuario
 {
 public:
     Usuario();
-    Usuario(const Usuario &other) = default;
 
     QString nome() const;
     void setNome(const QString &nome);

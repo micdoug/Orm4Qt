@@ -56,59 +56,76 @@ int main(int argc, char **argv)
 
    Usuario usuario;
    usuario.setNome("Michael");
-   usuario.setEmail("michael");
+   usuario.setEmail("email");
    usuario.setInscrito(QDate::currentDate());
    repository->saveObject<Usuario>(usuario);
 
+    if(repository->beginTransaction())
+    {
+        qDebug() << "Transação aberta";
+    }
+    else
+    {
+        qDebug() << "Erro na transação";
+        qDebug() << repository->lastError()->description();
+        if(repository->lastError()->errorType() == DatabaseError)
+        {
+            qDebug() << repository->lastError()->sqlError().text();
+        }
+    }
+
    QList<Usuario> usuarios;
-   if(repository->select<Usuario>(usuarios))
+   QList<QPair<QString, OrderBy>> orderby;
+   orderby.append(QPair<QString, OrderBy>("Nome", OrderBy::Desc));
+   orderby.append(QPair<QString, OrderBy>("Email", OrderBy::Asc));
+   if(repository->select<Usuario>(usuarios, Where("Nome", Contains, {"M"}), orderby, 2))
    {
        for(int i=0; i<usuarios.count(); ++i)
        {
             Usuario& usuario = usuarios[i];
             qDebug() << QString("%1 - %2").arg(usuario.codigo()).arg(usuario.nome());
-            if(repository->deleteObject<Usuario>(usuario))
-            {
-                qDebug() << "Usuario deletado";
-            }
-            else
-            {
-                qDebug() << "Erro na deleção";
-                qDebug() << repository->lastError()->description();
-                if(repository->lastError()->errorType() == DatabaseError)
-                {
-                    qDebug() << repository->lastError()->sqlError().text();
-                }
-            }
-            if(repository->saveObject<Usuario>(usuario))
-            {
-                qDebug() << "Usuário recriado";
-                qDebug() << QString("%1 - %2").arg(usuario.codigo()).arg(usuario.nome());
-            }
-            else
-            {
-                qDebug() << "Erro na recriação";
-                qDebug() << repository->lastError()->description();
-                if(repository->lastError()->errorType() == DatabaseError)
-                {
-                    qDebug() << repository->lastError()->sqlError().text();
-                }
-            }
-            usuario.setNome("Geralda");
-            if(repository->saveObject<Usuario>(usuario))
-            {
-                qDebug() << "Usuário mudado";
-                qDebug() << QString("%1 - %2").arg(usuario.codigo()).arg(usuario.nome());
-            }
-            else
-            {
-                qDebug() << "Erro na recriação";
-                qDebug() << repository->lastError()->description();
-                if(repository->lastError()->errorType() == DatabaseError)
-                {
-                    qDebug() << repository->lastError()->sqlError().text();
-                }
-            }
+//            if(repository->deleteObject<Usuario>(usuario))
+//            {
+//                qDebug() << "Usuario deletado";
+//            }
+//            else
+//            {
+//                qDebug() << "Erro na deleção";
+//                qDebug() << repository->lastError()->description();
+//                if(repository->lastError()->errorType() == DatabaseError)
+//                {
+//                    qDebug() << repository->lastError()->sqlError().text();
+//                }
+//            }
+//            if(repository->saveObject<Usuario>(usuario))
+//            {
+//                qDebug() << "Usuário recriado";
+//                qDebug() << QString("%1 - %2").arg(usuario.codigo()).arg(usuario.nome());
+//            }
+//            else
+//            {
+//                qDebug() << "Erro na recriação";
+//                qDebug() << repository->lastError()->description();
+//                if(repository->lastError()->errorType() == DatabaseError)
+//                {
+//                    qDebug() << repository->lastError()->sqlError().text();
+//                }
+//            }
+//            usuario.setNome("Geralda");
+//            if(repository->saveObject<Usuario>(usuario))
+//            {
+//                qDebug() << "Usuário mudado";
+//                qDebug() << QString("%1 - %2").arg(usuario.codigo()).arg(usuario.nome());
+//            }
+//            else
+//            {
+//                qDebug() << "Erro na recriação";
+//                qDebug() << repository->lastError()->description();
+//                if(repository->lastError()->errorType() == DatabaseError)
+//                {
+//                    qDebug() << repository->lastError()->sqlError().text();
+//                }
+//            }
        }
    }
    else
@@ -121,6 +138,19 @@ int main(int argc, char **argv)
        }
    }
 
-   return 0;
+   if(repository->commit())
+   {
+       qDebug() << "Transação cancelada";
+   }
+   else
+   {
+       qDebug() << "Erro no cancelamento da transação";
+       qDebug() << repository->lastError()->description();
+       if(repository->lastError()->errorType() == DatabaseError)
+       {
+           qDebug() << repository->lastError()->sqlError().text();
+       }
+   }
 
+   return 0;
 }

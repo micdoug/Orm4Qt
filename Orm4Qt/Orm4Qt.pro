@@ -19,7 +19,8 @@ SOURCES += \
     ormerror.cpp \
     sqlprovider.cpp \
     where.cpp \
-    sqliteprovider.cpp
+    sqliteprovider.cpp \
+    standardsqlprovider.cpp
 
 HEADERS += \
     reflect.h \
@@ -32,7 +33,8 @@ HEADERS += \
     sqlprovider.h \
     where.h \
     repository.h \
-    sqliteprovider.h
+    sqliteprovider.h \
+    standardsqlprovider.h
 unix {
     target.path = /usr/lib
     INSTALLS += target

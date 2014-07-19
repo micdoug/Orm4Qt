@@ -8,6 +8,7 @@
 #include <QStringList>
 #include <QSqlField>
 #include <QSqlDriver>
+#include <QMutex>
 #include <memory>
 
 namespace Orm4Qt
@@ -29,7 +30,8 @@ namespace Orm4Qt
             }
             else
             {
-                return shared_ptr<Repository>(new Repository(Repository::sm_provider.get()));
+                SqlProvider *provider = Repository::sm_provider->clone();
+                return shared_ptr<Repository>(new Repository(provider));
             }
         }
         /**
@@ -348,7 +350,8 @@ namespace Orm4Qt
          * True if the statement was executed with success or false in case of an error. The error can be retrieved using the method lastError().
          */
         template<class T>
-        bool select(QList<T> &list, const Where &where = Where(), const QStringList &fields = QStringList())
+        bool select(QList<T> &list, const Where &where = Where(), const QStringList &fields = QStringList(),
+                    const QList<QPair<QString, OrderBy>> orderby = QList<QPair<QString, OrderBy>>(), int offset=-1, int limit=-1)
         {
             //Try to open connection with the database
             if(!openConnection())
@@ -359,7 +362,7 @@ namespace Orm4Qt
 
             //Try to create the query
             QList<int> indexes = fieldIndexes(temp.reflection().get(), fields);
-            shared_ptr<QSqlQuery> query = m_provider->generateSelect(temp.reflection().get(), where, indexes);
+            shared_ptr<QSqlQuery> query = m_provider->generateSelect(temp.reflection().get(), where, indexes, orderby, offset, limit);
             if(query == nullptr)
             {
                 m_lastError = m_provider->lastError();
@@ -447,6 +450,81 @@ namespace Orm4Qt
             else
             {
                 m_lastError = shared_ptr<OrmError>(new OrmError(DatabaseError, QString("An error ocurred during the table creation in the database. See the sqlerror attached."), query->lastError()));
+                return false;
+            }
+        }
+
+        template<class T>
+        bool select(QList<T> &list, const QStringList &fields, const QList<QPair<QString, OrderBy>> orderby = QList<QPair<QString, OrderBy>>(), int limit=-1, int offset = 0)
+        {
+            return select(list, Where(), fields, orderby, offset, limit);
+        }
+
+        template<class T>
+        bool select(QList<T> &list, const Where &where, const QList<QPair<QString, OrderBy>> orderby = QList<QPair<QString, OrderBy>>(), int limit=-1, int offset = 0)
+        {
+            return select(list, where, QStringList(), orderby, offset, limit);
+        }
+
+        template<class T>
+        bool select(QList<T> &list, const QList<QPair<QString, OrderBy>> orderby, int limit=-1, int offset = 0)
+        {
+            return select(list, Where(), QStringList(), orderby, offset, limit);
+        }
+
+        template<class T>
+        bool select(QList<T> &list, int limit, int offset=0)
+        {
+            return select(list, Where(), QStringList(), QList<QPair<QString, OrderBy>>(), offset, limit);
+        }
+
+        bool beginTransaction()
+        {
+            if(!openConnection())
+                return false;
+
+            QSqlDatabase db = QSqlDatabase::database(m_provider->databaseConnectionName());
+            if(db.transaction())
+            {
+                return true;
+            }
+            else
+            {
+                m_lastError = shared_ptr<OrmError>(new OrmError(ErrorType::DatabaseError, QString("An error occurred while opening the transaction. See the sql error attached."), db.lastError()));
+                return false;
+            }
+        }
+
+        bool commit()
+        {
+            if(!openConnection())
+                return false;
+
+            QSqlDatabase db = QSqlDatabase::database(m_provider->databaseConnectionName());
+            if(db.commit())
+            {
+                return true;
+            }
+            else
+            {
+                m_lastError = shared_ptr<OrmError>(new OrmError(ErrorType::DatabaseError, QString("An error occurred while commit the transaction. See the sql error attached."), db.lastError()));
+                return false;
+            }
+        }
+
+        bool rollback()
+        {
+            if(!openConnection())
+                return false;
+
+            QSqlDatabase db = QSqlDatabase::database(m_provider->databaseConnectionName());
+            if(db.rollback())
+            {
+                return true;
+            }
+            else
+            {
+                m_lastError = shared_ptr<OrmError>(new OrmError(ErrorType::DatabaseError, QString("An error occurred while rollback the transaction. See the sql error attached."), db.lastError()));
                 return false;
             }
         }
