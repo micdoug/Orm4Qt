@@ -8,13 +8,11 @@ namespace Orm4Qt {
     class SqliteProvider : public StandardSqlProvider
     {
     public:
-        SqliteProvider(const QString &dbFileName, const QString &connectionName = QString("sqlite"));
-        SqliteProvider(const SqliteProvider &other);
+        SqliteProvider(const QString &dbFileName);
         virtual ~SqliteProvider();
 
         // SqlProvider interface
         virtual shared_ptr<QSqlQuery> generateCreateTable(Class *reflect) override;
-        virtual SqlProvider *clone() override;
 
     };
 

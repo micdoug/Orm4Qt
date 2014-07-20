@@ -8,8 +8,7 @@ namespace Orm4Qt
     class StandardSqlProvider : public SqlProvider
     {
     public:
-        StandardSqlProvider(const QString &connectionName);
-        StandardSqlProvider(const StandardSqlProvider &other);
+        StandardSqlProvider();
         virtual ~StandardSqlProvider();
 
         // SqlProvider interface

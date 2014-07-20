@@ -4,14 +4,11 @@
 
 using namespace Orm4Qt;
 
-SqliteProvider::SqliteProvider(const QString &dbFileName, const QString &connectionName) : StandardSqlProvider(connectionName)
+SqliteProvider::SqliteProvider(const QString &dbFileName) : StandardSqlProvider()
 {
-    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", connectionName);
+    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", databaseConnectionName());
     db.setDatabaseName(dbFileName);
 }
-
-SqliteProvider::SqliteProvider(const SqliteProvider &other) : StandardSqlProvider(other)
-{}
 
 SqliteProvider::~SqliteProvider()
 {}
@@ -178,9 +175,4 @@ shared_ptr<QSqlQuery> SqliteProvider::generateCreateTable(Class *reflect)
         m_lastError = shared_ptr<OrmError>(new OrmError(ErrorType::DatabaseError, QString("Invalid SQL statement for create table. See the sqlerror attached."), query->lastError()));
         return nullptr;
     }
-}
-
-SqlProvider *SqliteProvider::clone()
-{
-    return new SqliteProvider(*this);
 }

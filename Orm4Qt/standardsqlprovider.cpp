@@ -2,10 +2,7 @@
 
 using namespace Orm4Qt;
 
-StandardSqlProvider::StandardSqlProvider(const QString &connectionName) : SqlProvider(connectionName)
-{}
-
-StandardSqlProvider::StandardSqlProvider(const StandardSqlProvider &other) : SqlProvider(other)
+StandardSqlProvider::StandardSqlProvider() : SqlProvider()
 {}
 
 StandardSqlProvider::~StandardSqlProvider()

@@ -9,13 +9,11 @@ namespace Orm4Qt {
     {
     public:
         PostgreSqlProvider(const QString &user, const QString &password, const QString &database,
-                           const QString &host = QString("localhost"), int port=5432, const QString &connectionName = QString("PostgreSql"));
-        PostgreSqlProvider(const PostgreSqlProvider &other);
+                           const QString &host = QString("localhost"), int port=5432);
         virtual ~PostgreSqlProvider();
 
         // SqlProvider interface
         virtual shared_ptr<QSqlQuery> generateCreateTable(Class *reflect);
-        virtual SqlProvider *clone();
     };
 
 } // namespace Orm4Qt

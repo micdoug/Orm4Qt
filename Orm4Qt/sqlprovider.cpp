@@ -1,4 +1,5 @@
 #include "sqlprovider.h"
+#include <QUuid>
 #include <QSqlDatabase>
 
 using namespace Orm4Qt;
@@ -9,30 +10,16 @@ using namespace Orm4Qt;
  * @param connectionName
  * The name of the database connection associated with this provider.
  */
-SqlProvider::SqlProvider(const QString &connectionName) :
-    m_databaseConnectionName(connectionName)
-{}
-
-/**
- * Copy constructor. It copies the database connection associated with the other instance of provider.
- * @param other
- * The instance to be copied.
- */
-SqlProvider::SqlProvider(const SqlProvider &other)
+SqlProvider::SqlProvider()
 {
-    int diff = 0;
     while(true)
     {
-        QSqlDatabase db = QSqlDatabase::cloneDatabase(QSqlDatabase::database(other.databaseConnectionName(), false),
-                                                      QString("%1_%2").arg(other.databaseConnectionName()).arg(diff));
-        if(db.isValid())
+        QUuid id = QUuid::createUuid();
+        QSqlDatabase db = QSqlDatabase::database(id.toString());
+        if(!db.isValid())
         {
-            m_databaseConnectionName = QString("%1_%2").arg(other.databaseConnectionName()).arg(diff);
+            m_databaseConnectionName = id.toString();
             break;
-        }
-        else
-        {
-            ++diff;
         }
     }
 }
@@ -63,16 +50,6 @@ SqlProvider::~SqlProvider()
 QString SqlProvider::databaseConnectionName() const
 {
     return m_databaseConnectionName;
-}
-
-/**
- * Method for adjust the database connection name associated with this instance of provider.
- * @param databaseConnectionName
- * The new connection name
- */
-void SqlProvider::setDatabaseConnectionName(const QString &databaseConnectionName)
-{
-    m_databaseConnectionName = databaseConnectionName;
 }
 
 /**

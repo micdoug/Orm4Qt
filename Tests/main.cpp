@@ -36,7 +36,7 @@ int main(int argc, char **argv)
    QTest::qExec(treflectionsystem);
    delete treflectionsystem;*/
 
-   Repository::registerProvider(new PostgreSqlProvider("postgres", "userlinux007#", "teste"));
+   Repository::registerProvider([]() { return new PostgreSqlProvider("postgres", "userlinux007#", "teste");});
    auto repository = Repository::createRepository();
 
    Usuario usuario;

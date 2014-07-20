@@ -20,11 +20,9 @@ namespace Orm4Qt
     class SqlProvider
     {
     public:
-        SqlProvider(const QString &connectionName);
-        SqlProvider(const SqlProvider &other);
+        SqlProvider();
         virtual ~SqlProvider();
         QString databaseConnectionName() const;
-        void setDatabaseConnectionName(const QString &databaseConnectionName);
         virtual shared_ptr<QSqlQuery> generateInsert(Class *reflect, const QList<int> &fieldsno) = 0;
         virtual shared_ptr<QSqlQuery> generateUpdate(Class *reflect, const QList<int> &fieldsno) = 0;
         virtual shared_ptr<QSqlQuery> generateDelete(Class *reflect) = 0;
@@ -32,7 +30,6 @@ namespace Orm4Qt
                                                      const QList<QPair<QString, OrderBy>> orderby = QList<QPair<QString, OrderBy>>(),
                                                      int offset=-1, int limit = -1) = 0;
         virtual shared_ptr<QSqlQuery> generateCreateTable(Class *reflect) = 0;
-        virtual SqlProvider *clone() = 0;
         shared_ptr<OrmError> lastError() const;
     private:
         QString m_databaseConnectionName;

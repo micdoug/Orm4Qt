@@ -4,8 +4,8 @@ using namespace Orm4Qt;
 
 
 PostgreSqlProvider::PostgreSqlProvider(const QString &user, const QString &password, const QString &database,
-                                       const QString &host, int port, const QString &connectionName) :
-    StandardSqlProvider(connectionName)
+                                       const QString &host, int port) :
+    StandardSqlProvider()
 {
     QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL", databaseConnectionName());
     db.setDatabaseName(database);
@@ -15,18 +15,10 @@ PostgreSqlProvider::PostgreSqlProvider(const QString &user, const QString &passw
     db.setPort(port);
 }
 
-PostgreSqlProvider::PostgreSqlProvider(const PostgreSqlProvider &other) : StandardSqlProvider(other)
-{}
-
 PostgreSqlProvider::~PostgreSqlProvider()
 {}
 
 shared_ptr<QSqlQuery> PostgreSqlProvider::generateCreateTable(Class *reflect)
 {
     return nullptr;
-}
-
-SqlProvider *PostgreSqlProvider::clone()
-{
-    return new PostgreSqlProvider(*this);
 }
