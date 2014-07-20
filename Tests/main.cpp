@@ -4,6 +4,7 @@
 #include "testreflectionsystem.h"
 #include "repository.h"
 #include "sqliteprovider.h"
+#include "postgresqlprovider.h"
 #include "book.h"
 #include "usuario.h"
 
@@ -35,16 +36,24 @@ int main(int argc, char **argv)
    QTest::qExec(treflectionsystem);
    delete treflectionsystem;*/
 
-   Repository::registerProvider(new SqliteProvider("Teste.sqlite"));
+   Repository::registerProvider(new PostgreSqlProvider("postgres", "userlinux007#", "teste"));
    auto repository = Repository::createRepository();
 
-//   if(repository->createTable<Usuario>())
+   Usuario usuario;
+   usuario.setNome("Geralda Queiroz Silva");
+   usuario.setEmail("geralda@gmail.com");
+   usuario.setPontos(10.50);
+   usuario.setInscrito(QDate::currentDate());
+
+//   if(repository->saveObject<Usuario>(usuario))
 //   {
-//       qDebug() << "Tabela criada com sucesso!";
+//       qDebug() << QString("%1 - %2 - %3").
+//                   arg(usuario.codigo()).
+//                   arg(usuario.nome()).
+//                   arg(usuario.email());
 //   }
 //   else
 //   {
-//       qDebug() << "Erro na criação da tabela.";
 //       qDebug() << repository->lastError()->description();
 //       if(repository->lastError()->errorType() == DatabaseError)
 //       {
@@ -52,99 +61,18 @@ int main(int argc, char **argv)
 //       }
 //   }
 
-//   return 0;
-
-   Usuario usuario;
-   usuario.setNome("Michael");
-   usuario.setEmail("email");
-   usuario.setInscrito(QDate::currentDate());
-   repository->saveObject<Usuario>(usuario);
-
-    if(repository->beginTransaction())
-    {
-        qDebug() << "Transação aberta";
-    }
-    else
-    {
-        qDebug() << "Erro na transação";
-        qDebug() << repository->lastError()->description();
-        if(repository->lastError()->errorType() == DatabaseError)
-        {
-            qDebug() << repository->lastError()->sqlError().text();
-        }
-    }
-
-   QList<Usuario> usuarios;
+   QList<Usuario> list;
    QList<QPair<QString, OrderBy>> orderby;
-   orderby.append(QPair<QString, OrderBy>("Nome", OrderBy::Desc));
-   orderby.append(QPair<QString, OrderBy>("Email", OrderBy::Asc));
-   if(repository->select<Usuario>(usuarios, Where("Nome", Contains, {"M"}), orderby, 2))
+   orderby.append(QPair<QString, OrderBy>("Nome", Asc));
+   if(repository->select<Usuario>(list, orderby, 10))
    {
-       for(int i=0; i<usuarios.count(); ++i)
+       for(Usuario u: list)
        {
-            Usuario& usuario = usuarios[i];
-            qDebug() << QString("%1 - %2").arg(usuario.codigo()).arg(usuario.nome());
-//            if(repository->deleteObject<Usuario>(usuario))
-//            {
-//                qDebug() << "Usuario deletado";
-//            }
-//            else
-//            {
-//                qDebug() << "Erro na deleção";
-//                qDebug() << repository->lastError()->description();
-//                if(repository->lastError()->errorType() == DatabaseError)
-//                {
-//                    qDebug() << repository->lastError()->sqlError().text();
-//                }
-//            }
-//            if(repository->saveObject<Usuario>(usuario))
-//            {
-//                qDebug() << "Usuário recriado";
-//                qDebug() << QString("%1 - %2").arg(usuario.codigo()).arg(usuario.nome());
-//            }
-//            else
-//            {
-//                qDebug() << "Erro na recriação";
-//                qDebug() << repository->lastError()->description();
-//                if(repository->lastError()->errorType() == DatabaseError)
-//                {
-//                    qDebug() << repository->lastError()->sqlError().text();
-//                }
-//            }
-//            usuario.setNome("Geralda");
-//            if(repository->saveObject<Usuario>(usuario))
-//            {
-//                qDebug() << "Usuário mudado";
-//                qDebug() << QString("%1 - %2").arg(usuario.codigo()).arg(usuario.nome());
-//            }
-//            else
-//            {
-//                qDebug() << "Erro na recriação";
-//                qDebug() << repository->lastError()->description();
-//                if(repository->lastError()->errorType() == DatabaseError)
-//                {
-//                    qDebug() << repository->lastError()->sqlError().text();
-//                }
-//            }
+           qDebug() << QString("%1 \t %2").arg(u.codigo()).arg(u.nome());
        }
    }
    else
    {
-       qDebug() << "Erro na criação da tabela.";
-       qDebug() << repository->lastError()->description();
-       if(repository->lastError()->errorType() == DatabaseError)
-       {
-           qDebug() << repository->lastError()->sqlError().text();
-       }
-   }
-
-   if(repository->commit())
-   {
-       qDebug() << "Transação cancelada";
-   }
-   else
-   {
-       qDebug() << "Erro no cancelamento da transação";
        qDebug() << repository->lastError()->description();
        if(repository->lastError()->errorType() == DatabaseError)
        {

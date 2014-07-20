@@ -20,7 +20,8 @@ SOURCES += \
     sqlprovider.cpp \
     where.cpp \
     sqliteprovider.cpp \
-    standardsqlprovider.cpp
+    standardsqlprovider.cpp \
+    postgresqlprovider.cpp
 
 HEADERS += \
     reflect.h \
@@ -34,7 +35,8 @@ HEADERS += \
     where.h \
     repository.h \
     sqliteprovider.h \
-    standardsqlprovider.h
+    standardsqlprovider.h \
+    postgresqlprovider.h
 unix {
     target.path = /usr/lib
     INSTALLS += target

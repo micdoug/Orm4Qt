@@ -56,8 +56,7 @@ namespace Orm4Qt
          */
         Repository(SqlProvider *provider)
         {
-            SqlProvider *clone = provider->clone();
-            m_provider = shared_ptr<SqlProvider>(clone);
+            m_provider = shared_ptr<SqlProvider>(provider);
         }
         /**
          * Copy constructor
@@ -405,7 +404,6 @@ namespace Orm4Qt
                     //Adjust the scope of the object
                     object.reflection()->replaceTag("scope", Scope::Remote);
                     list.append(object);
-                    qDebug() << list[0].reflection()->properties()[2]->value();
                 }
                 return true;
             }
