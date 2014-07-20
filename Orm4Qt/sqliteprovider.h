@@ -12,7 +12,7 @@ namespace Orm4Qt {
         virtual ~SqliteProvider();
 
         // SqlProvider interface
-        virtual shared_ptr<QSqlQuery> generateCreateTable(Class *reflect) override;
+        virtual std::shared_ptr<QSqlQuery> generateCreateTable(Class *reflect) override;
 
     };
 

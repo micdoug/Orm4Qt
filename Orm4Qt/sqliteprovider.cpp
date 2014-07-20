@@ -13,7 +13,7 @@ SqliteProvider::SqliteProvider(const QString &dbFileName) : StandardSqlProvider(
 SqliteProvider::~SqliteProvider()
 {}
 
-shared_ptr<QSqlQuery> SqliteProvider::generateCreateTable(Class *reflect)
+std::shared_ptr<QSqlQuery> SqliteProvider::generateCreateTable(Class *reflect)
 {
     //Creating the strings to hold the sql commands
     QString sqlstr;
@@ -31,7 +31,7 @@ shared_ptr<QSqlQuery> SqliteProvider::generateCreateTable(Class *reflect)
     }
     else
     {
-        m_lastError = shared_ptr<OrmError>(new OrmError(ErrorType::ConfigurationError, QString("The tag 'table' was not supplied for the class '%1'.").arg(reflect->tags()["name"].toString())));
+        m_lastError = std::shared_ptr<OrmError>(new OrmError(ErrorType::ConfigurationError, QString("The tag 'table' was not supplied for the class '%1'.").arg(reflect->tags()["name"].toString())));
         return nullptr;
     }//End add table name
 
@@ -58,7 +58,7 @@ shared_ptr<QSqlQuery> SqliteProvider::generateCreateTable(Class *reflect)
     }
     else if(!reflect->tags()["autocolumn"].isNull())
     {
-        m_lastError = shared_ptr<OrmError>(new OrmError(ErrorType::ConfigurationError, QString("Error in the definition of the table for the class '%1'. You can't use autoid and autocolumn at the same time.").arg(reflect->tags()["name"].toString())));
+        m_lastError = std::shared_ptr<OrmError>(new OrmError(ErrorType::ConfigurationError, QString("Error in the definition of the table for the class '%1'. You can't use autoid and autocolumn at the same time.").arg(reflect->tags()["name"].toString())));
         return nullptr;
     }//End verify if autocolumn is used
 
@@ -68,7 +68,7 @@ shared_ptr<QSqlQuery> SqliteProvider::generateCreateTable(Class *reflect)
         //Verifying if the tag column is present
         if(prop->tags()["column"].isNull())
         {
-            m_lastError = shared_ptr<OrmError>(new OrmError(ErrorType::ConfigurationError, QString("The tag 'column' was not supplied for the property '%1' in the class '%2'.")
+            m_lastError = std::shared_ptr<OrmError>(new OrmError(ErrorType::ConfigurationError, QString("The tag 'column' was not supplied for the property '%1' in the class '%2'.")
                                                             .arg(prop->tags()["name"].toString())
                                                             .arg(reflect->tags()["name"].toString())));
             return nullptr;
@@ -98,7 +98,7 @@ shared_ptr<QSqlQuery> SqliteProvider::generateCreateTable(Class *reflect)
                     sql << "BLOB ";
                     break;
                 case QMetaType::User:
-                    m_lastError = shared_ptr<OrmError>(new OrmError(ErrorType::ConfigurationError, QString("The type of the property '%1' in the class '%2' is not supported.")
+                    m_lastError = std::shared_ptr<OrmError>(new OrmError(ErrorType::ConfigurationError, QString("The type of the property '%1' in the class '%2' is not supported.")
                                                                 .arg(prop->tags()["name"].toString())
                                                                 .arg(reflect->tags()["name"].toString())));
                     return nullptr;
@@ -117,7 +117,7 @@ shared_ptr<QSqlQuery> SqliteProvider::generateCreateTable(Class *reflect)
                 //If it was defined a autoincrement column, we can't add primary keys
                 if(autoid)
                 {
-                    m_lastError = shared_ptr<OrmError>(new OrmError(ErrorType::ConfigurationError, QString("Error in the property '%1'' in the class '%2'. Sqlite doesn't support "
+                    m_lastError = std::shared_ptr<OrmError>(new OrmError(ErrorType::ConfigurationError, QString("Error in the property '%1'' in the class '%2'. Sqlite doesn't support "
                                                                                                            "composite primary key when autoincrement is used.")
                                                                     .arg(prop->tags()["name"].toString())
                                                                     .arg(reflect->tags()["name"].toString())));
@@ -163,7 +163,7 @@ shared_ptr<QSqlQuery> SqliteProvider::generateCreateTable(Class *reflect)
     }
 
     //Create a query object using the database connection with the name supplied
-    shared_ptr<QSqlQuery> query(new QSqlQuery(QSqlDatabase::database(databaseConnectionName())));
+    std::shared_ptr<QSqlQuery> query(new QSqlQuery(QSqlDatabase::database(databaseConnectionName())));
     //Check if the query is valid and can be exec
     if(query->prepare(sqlstr))
     {
@@ -172,7 +172,7 @@ shared_ptr<QSqlQuery> SqliteProvider::generateCreateTable(Class *reflect)
     //If it doesn't, generate an error
     else
     {
-        m_lastError = shared_ptr<OrmError>(new OrmError(ErrorType::DatabaseError, QString("Invalid SQL statement for create table. See the sqlerror attached."), query->lastError()));
+        m_lastError = std::shared_ptr<OrmError>(new OrmError(ErrorType::DatabaseError, QString("Invalid SQL statement for create table. See the sqlerror attached."), query->lastError()));
         return nullptr;
     }
 }

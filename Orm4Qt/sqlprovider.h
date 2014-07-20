@@ -23,18 +23,18 @@ namespace Orm4Qt
         SqlProvider();
         virtual ~SqlProvider();
         QString databaseConnectionName() const;
-        virtual shared_ptr<QSqlQuery> generateInsert(Class *reflect, const QList<int> &fieldsno) = 0;
-        virtual shared_ptr<QSqlQuery> generateUpdate(Class *reflect, const QList<int> &fieldsno) = 0;
-        virtual shared_ptr<QSqlQuery> generateDelete(Class *reflect) = 0;
-        virtual shared_ptr<QSqlQuery> generateSelect(Class *reflect, const Where &where, const QList<int> &fieldsno,
+        virtual std::shared_ptr<QSqlQuery> generateInsert(Class *reflect, const QList<int> &fieldsno) = 0;
+        virtual std::shared_ptr<QSqlQuery> generateUpdate(Class *reflect, const QList<int> &fieldsno) = 0;
+        virtual std::shared_ptr<QSqlQuery> generateDelete(Class *reflect) = 0;
+        virtual std::shared_ptr<QSqlQuery> generateSelect(Class *reflect, const Where &where, const QList<int> &fieldsno,
                                                      const QList<QPair<QString, OrderBy>> orderby = QList<QPair<QString, OrderBy>>(),
                                                      int offset=-1, int limit = -1) = 0;
-        virtual shared_ptr<QSqlQuery> generateCreateTable(Class *reflect) = 0;
-        shared_ptr<OrmError> lastError() const;
+        virtual std::shared_ptr<QSqlQuery> generateCreateTable(Class *reflect) = 0;
+        std::shared_ptr<OrmError> lastError() const;
     private:
         QString m_databaseConnectionName;
     protected:
-        shared_ptr<OrmError> m_lastError;
+        std::shared_ptr<OrmError> m_lastError;
     };
 }
 

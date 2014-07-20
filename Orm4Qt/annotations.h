@@ -20,15 +20,15 @@
 
 #define ORM4QT_BEGIN \
     private: \
-    shared_ptr<Orm4Qt::Class> m_reflectionObject =  nullptr;\
+    std::shared_ptr<Orm4Qt::Class> m_reflectionObject =  nullptr;\
     public:\
-    shared_ptr<Orm4Qt::Class> reflection()\
+    std::shared_ptr<Orm4Qt::Class> reflection()\
     {\
         DEBUG_CREATE_CLASS \
         if(m_reflectionObject.use_count()>1)\
-            m_reflectionObject = shared_ptr<Orm4Qt::Class>(new Orm4Qt::Class(*m_reflectionObject.get()));\
+            m_reflectionObject = std::shared_ptr<Orm4Qt::Class>(new Orm4Qt::Class(*m_reflectionObject.get()));\
         else if(m_reflectionObject == nullptr) {\
-            m_reflectionObject = shared_ptr<Orm4Qt::Class>(new Orm4Qt::Class());
+            m_reflectionObject = std::shared_ptr<Orm4Qt::Class>(new Orm4Qt::Class());
 
 #define ORM4QT_END \
         DEBUG_FINISH_CLASS \

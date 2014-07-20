@@ -5,10 +5,7 @@
 using namespace Orm4Qt;
 
 /**
- * Constructor with initialization of the database connection name associated with this instance
- * of sql provider.
- * @param connectionName
- * The name of the database connection associated with this provider.
+ * Constructor that initializes the database connection name of this instance of provider with a unique identifier.
  */
 SqlProvider::SqlProvider()
 {
@@ -57,7 +54,7 @@ QString SqlProvider::databaseConnectionName() const
  * @return
  * The error descriptor.
  */
-shared_ptr<OrmError> SqlProvider::lastError() const
+std::shared_ptr<OrmError> SqlProvider::lastError() const
 {
     return m_lastError;
 }

@@ -8,12 +8,12 @@ StandardSqlProvider::StandardSqlProvider() : SqlProvider()
 StandardSqlProvider::~StandardSqlProvider()
 {}
 
-shared_ptr<QSqlQuery> StandardSqlProvider::generateInsert(Class *reflect, const QList<int> &fieldsno)
+std::shared_ptr<QSqlQuery> StandardSqlProvider::generateInsert(Class *reflect, const QList<int> &fieldsno)
 {
     //Check if there are fields to insert
     if(fieldsno.isEmpty())
     {
-        m_lastError = shared_ptr<OrmError>(new OrmError(ErrorType::InvalidRequest, QString("There aren't fields to insert. Check if the name of the fields informed are valid.")));
+        m_lastError = std::shared_ptr<OrmError>(new OrmError(ErrorType::InvalidRequest, QString("There aren't fields to insert. Check if the name of the fields informed are valid.")));
         return nullptr;
 
     }//End Check if there are fields to insert
@@ -37,7 +37,7 @@ shared_ptr<QSqlQuery> StandardSqlProvider::generateInsert(Class *reflect, const 
     }
     else
     {
-        m_lastError = shared_ptr<OrmError>(new OrmError(ErrorType::ConfigurationError, QString("The tag 'table' was not supplied for the class '%1'.").arg(reflect->tags()["name"].toString())));
+        m_lastError = std::shared_ptr<OrmError>(new OrmError(ErrorType::ConfigurationError, QString("The tag 'table' was not supplied for the class '%1'.").arg(reflect->tags()["name"].toString())));
         return nullptr;
     }//End add table name
 
@@ -47,7 +47,7 @@ shared_ptr<QSqlQuery> StandardSqlProvider::generateInsert(Class *reflect, const 
         Property *prop = reflect->properties()[index];
         if(prop->tags()["column"].isNull())
         {
-            m_lastError = shared_ptr<OrmError>(new OrmError(ErrorType::ConfigurationError, QString("The tag 'column' was not supplied for the property '%1' in the class '%2'.")
+            m_lastError = std::shared_ptr<OrmError>(new OrmError(ErrorType::ConfigurationError, QString("The tag 'column' was not supplied for the property '%1' in the class '%2'.")
                                                             .arg(prop->tags()["name"].toString())
                                                             .arg(reflect->tags()["name"].toString())));
             return nullptr;
@@ -75,7 +75,7 @@ shared_ptr<QSqlQuery> StandardSqlProvider::generateInsert(Class *reflect, const 
     //End combine sql statement with columns and values
 
     //Create and validate query
-    shared_ptr<QSqlQuery> query(new QSqlQuery(QSqlDatabase::database(databaseConnectionName())));
+    std::shared_ptr<QSqlQuery> query(new QSqlQuery(QSqlDatabase::database(databaseConnectionName())));
     if(query->prepare(sqlstr))
     {
         //Bind values of the insert
@@ -89,17 +89,17 @@ shared_ptr<QSqlQuery> StandardSqlProvider::generateInsert(Class *reflect, const 
     }
     else
     {
-        m_lastError = shared_ptr<OrmError>(new OrmError(ErrorType::DatabaseError, QString("Invalid SQL statement for insert a row. See the sqlerror attached."), query->lastError()));
+        m_lastError = std::shared_ptr<OrmError>(new OrmError(ErrorType::DatabaseError, QString("Invalid SQL statement for insert a row. See the sqlerror attached."), query->lastError()));
         return nullptr;
     }//End create and validate query
 }
 
-shared_ptr<QSqlQuery> StandardSqlProvider::generateUpdate(Class *reflect, const QList<int> &fieldsno)
+std::shared_ptr<QSqlQuery> StandardSqlProvider::generateUpdate(Class *reflect, const QList<int> &fieldsno)
 {
     //Check if there are fields to update
     if(fieldsno.isEmpty())
     {
-        m_lastError = shared_ptr<OrmError>(new OrmError(ErrorType::InvalidRequest, QString("There aren't fields to update. Check if the name of the fields informed are valid. In the update operation the autoid, autocolumn and primary keys properties are ignored.")));
+        m_lastError = std::shared_ptr<OrmError>(new OrmError(ErrorType::InvalidRequest, QString("There aren't fields to update. Check if the name of the fields informed are valid. In the update operation the autoid, autocolumn and primary keys properties are ignored.")));
         return nullptr;
 
     }//End Check if there are fields to update
@@ -118,7 +118,7 @@ shared_ptr<QSqlQuery> StandardSqlProvider::generateUpdate(Class *reflect, const 
     }
     else
     {
-        m_lastError = shared_ptr<OrmError>(new OrmError(ErrorType::ConfigurationError, QString("The tag 'table' was not supplied for the class '%1'.").arg(reflect->tags()["name"].toString())));
+        m_lastError = std::shared_ptr<OrmError>(new OrmError(ErrorType::ConfigurationError, QString("The tag 'table' was not supplied for the class '%1'.").arg(reflect->tags()["name"].toString())));
         return nullptr;
     }//End insert the table name
 
@@ -139,7 +139,7 @@ shared_ptr<QSqlQuery> StandardSqlProvider::generateUpdate(Class *reflect, const 
         }
         else
         {
-            m_lastError = shared_ptr<OrmError>(new OrmError(ErrorType::ConfigurationError, QString("The tag 'column' was not supplied for the property '%1' in the class '%2'.")
+            m_lastError = std::shared_ptr<OrmError>(new OrmError(ErrorType::ConfigurationError, QString("The tag 'column' was not supplied for the property '%1' in the class '%2'.")
                                                             .arg(prop->tags()["name"].toString())
                                                             .arg(reflect->tags()["name"].toString())));
             return nullptr;
@@ -188,7 +188,7 @@ shared_ptr<QSqlQuery> StandardSqlProvider::generateUpdate(Class *reflect, const 
         {
             if(prop->tags()["column"].isNull())
             {
-                m_lastError = shared_ptr<OrmError>(new OrmError(ErrorType::ConfigurationError, QString("The tag 'column' was not supplied for the property '%1' in the class '%2'.")
+                m_lastError = std::shared_ptr<OrmError>(new OrmError(ErrorType::ConfigurationError, QString("The tag 'column' was not supplied for the property '%1' in the class '%2'.")
                                                                 .arg(prop->tags()["name"].toString())
                                                                 .arg(reflect->tags()["name"].toString())));
             }
@@ -205,7 +205,7 @@ shared_ptr<QSqlQuery> StandardSqlProvider::generateUpdate(Class *reflect, const 
 
     sqlstr = sqlstr.left(sqlstr.size()-4);
     //Create the query object
-    shared_ptr<QSqlQuery> query(new QSqlQuery(QSqlDatabase::database(databaseConnectionName())));
+    std::shared_ptr<QSqlQuery> query(new QSqlQuery(QSqlDatabase::database(databaseConnectionName())));
     //Testing query
     if(query->prepare(sqlstr))
     {
@@ -217,12 +217,12 @@ shared_ptr<QSqlQuery> StandardSqlProvider::generateUpdate(Class *reflect, const 
     }
     else
     {
-        m_lastError = shared_ptr<OrmError>(new OrmError(ErrorType::DatabaseError, QString("Invalid SQL statement for update a row. See the sqlerror attached."), query->lastError()));
+        m_lastError = std::shared_ptr<OrmError>(new OrmError(ErrorType::DatabaseError, QString("Invalid SQL statement for update a row. See the sqlerror attached."), query->lastError()));
         return nullptr;
     }
 }
 
-shared_ptr<QSqlQuery> StandardSqlProvider::generateDelete(Class *reflect)
+std::shared_ptr<QSqlQuery> StandardSqlProvider::generateDelete(Class *reflect)
 {
     //Objects to store the sql command
     QString sqlstr;
@@ -238,7 +238,7 @@ shared_ptr<QSqlQuery> StandardSqlProvider::generateDelete(Class *reflect)
     }
     else
     {
-        m_lastError = shared_ptr<OrmError>(new OrmError(ErrorType::ConfigurationError, QString("The tag 'table' was not supplied for the class '%1'.").arg(reflect->tags()["name"].toString())));
+        m_lastError = std::shared_ptr<OrmError>(new OrmError(ErrorType::ConfigurationError, QString("The tag 'table' was not supplied for the class '%1'.").arg(reflect->tags()["name"].toString())));
         return nullptr;
     }//End add the table name
 
@@ -274,7 +274,7 @@ shared_ptr<QSqlQuery> StandardSqlProvider::generateDelete(Class *reflect)
         {
             if(prop->tags()["column"].isNull())
             {
-                m_lastError = shared_ptr<OrmError>(new OrmError(ErrorType::ConfigurationError, QString("The tag 'column' was not supplied for the property '%1' in the class '%2'.")
+                m_lastError = std::shared_ptr<OrmError>(new OrmError(ErrorType::ConfigurationError, QString("The tag 'column' was not supplied for the property '%1' in the class '%2'.")
                                                                 .arg(prop->tags()["name"].toString())
                                                                 .arg(reflect->tags()["name"].toString())));
             }
@@ -292,7 +292,7 @@ shared_ptr<QSqlQuery> StandardSqlProvider::generateDelete(Class *reflect)
 
     sqlstr = sqlstr.left(sqlstr.size()-4);
     //Create the query object
-    shared_ptr<QSqlQuery> query(new QSqlQuery(QSqlDatabase::database(databaseConnectionName())));
+    std::shared_ptr<QSqlQuery> query(new QSqlQuery(QSqlDatabase::database(databaseConnectionName())));
     //Testing query
     if(query->prepare(sqlstr))
     {
@@ -304,12 +304,12 @@ shared_ptr<QSqlQuery> StandardSqlProvider::generateDelete(Class *reflect)
     }
     else
     {
-        m_lastError = shared_ptr<OrmError>(new OrmError(ErrorType::DatabaseError, QString("Invalid SQL statement for delete a row. See the sqlerror attached."), query->lastError()));
+        m_lastError = std::shared_ptr<OrmError>(new OrmError(ErrorType::DatabaseError, QString("Invalid SQL statement for delete a row. See the sqlerror attached."), query->lastError()));
         return nullptr;
     }
 }
 
-shared_ptr<QSqlQuery> StandardSqlProvider::generateSelect(Class *reflect, const Where &where, const QList<int> &fieldsno, const QList<QPair<QString, OrderBy> > orderby, int offset, int limit)
+std::shared_ptr<QSqlQuery> StandardSqlProvider::generateSelect(Class *reflect, const Where &where, const QList<int> &fieldsno, const QList<QPair<QString, OrderBy> > orderby, int offset, int limit)
 {
     //Objects to store the sql command
     QString sqlstr;
@@ -325,7 +325,7 @@ shared_ptr<QSqlQuery> StandardSqlProvider::generateSelect(Class *reflect, const 
         //Check if the property has the column tag
         if(prop->tags()["column"].isNull())
         {
-            m_lastError = shared_ptr<OrmError>(new OrmError(ErrorType::ConfigurationError, QString("The tag 'column' was not supplied for the property '%1' in the class '%2'.")
+            m_lastError = std::shared_ptr<OrmError>(new OrmError(ErrorType::ConfigurationError, QString("The tag 'column' was not supplied for the property '%1' in the class '%2'.")
                                                             .arg(prop->tags()["name"].toString())
                                                             .arg(reflect->tags()["name"].toString())));
             return nullptr;
@@ -354,7 +354,7 @@ shared_ptr<QSqlQuery> StandardSqlProvider::generateSelect(Class *reflect, const 
     sql << " FROM ";
     if(reflect->tags()["table"].isNull())
     {
-        m_lastError = shared_ptr<OrmError>(new OrmError(ErrorType::ConfigurationError, QString("The tag 'table' was not supplied for the class '%1'.").arg(reflect->tags()["name"].toString())));
+        m_lastError = std::shared_ptr<OrmError>(new OrmError(ErrorType::ConfigurationError, QString("The tag 'table' was not supplied for the class '%1'.").arg(reflect->tags()["name"].toString())));
         return nullptr;
     }
     else
@@ -476,7 +476,7 @@ shared_ptr<QSqlQuery> StandardSqlProvider::generateSelect(Class *reflect, const 
                     wherestr = wherestr.left(wherestr.size()-2)+") ";
                     break;
                 default:
-                    m_lastError = shared_ptr<OrmError>(new OrmError(ErrorType::OperationNotSupported, QString("This type of comparison is not supported by this sql provider.")));
+                    m_lastError = std::shared_ptr<OrmError>(new OrmError(ErrorType::OperationNotSupported, QString("This type of comparison is not supported by this sql provider.")));
                     return nullptr;
             } //End check the type of operation
 
@@ -526,7 +526,7 @@ shared_ptr<QSqlQuery> StandardSqlProvider::generateSelect(Class *reflect, const 
                     }
                     else
                     {
-                        m_lastError = shared_ptr<OrmError>(new OrmError(ErrorType::ConfigurationError, QString("The tag 'column' was not supplied for the property '%1' in the class '%2'.")
+                        m_lastError = std::shared_ptr<OrmError>(new OrmError(ErrorType::ConfigurationError, QString("The tag 'column' was not supplied for the property '%1' in the class '%2'.")
                                                                         .arg(prop->tags()["name"].toString())
                                                                         .arg(reflect->tags()["name"].toString())));
                         return nullptr;
@@ -547,7 +547,7 @@ shared_ptr<QSqlQuery> StandardSqlProvider::generateSelect(Class *reflect, const 
     }//End check if the offset and the limit are used
 
     //Create a new query object
-    shared_ptr<QSqlQuery> query(new QSqlQuery(QSqlDatabase::database(databaseConnectionName())));
+    std::shared_ptr<QSqlQuery> query(new QSqlQuery(QSqlDatabase::database(databaseConnectionName())));
 
     //Check if the sql statement is valid
     if(query->prepare(sqlstr))
@@ -564,7 +564,7 @@ shared_ptr<QSqlQuery> StandardSqlProvider::generateSelect(Class *reflect, const 
     //If the sql statement is invalid raise an error
     else
     {
-        m_lastError = shared_ptr<OrmError>(new OrmError(ErrorType::DatabaseError, QString("Invalid SQL statement for select. See the sqlerror attached."), query->lastError()));
+        m_lastError = std::shared_ptr<OrmError>(new OrmError(ErrorType::DatabaseError, QString("Invalid SQL statement for select. See the sqlerror attached."), query->lastError()));
         return nullptr;
     }
 

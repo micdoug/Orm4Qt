@@ -7,11 +7,12 @@
 #include "postgresqlprovider.h"
 #include "book.h"
 #include "usuario.h"
+#include <string>
 
 #include <QFile>
 #include <QTextStream>
 
-using namespace std;
+//using namespace std;
 
 QTextStream cin(stdin, QIODevice::ReadOnly);
 QTextStream cout(stdout, QIODevice::WriteOnly);
@@ -36,8 +37,8 @@ int main(int argc, char **argv)
    QTest::qExec(treflectionsystem);
    delete treflectionsystem;*/
 
-   Repository::registerProvider([]() { return new PostgreSqlProvider("postgres", "userlinux007#", "teste");});
-   auto repository = Repository::createRepository();
+   //Repository::registerProvider([]() { return new PostgreSqlProvider("postgres", "userlinux007#", "teste");});
+   auto repository = new Repository(new PostgreSqlProvider("postgres", "userlinux007#", "teste"));
 
    Usuario usuario;
    usuario.setNome("Geralda Queiroz Silva");
@@ -45,26 +46,24 @@ int main(int argc, char **argv)
    usuario.setPontos(10.50);
    usuario.setInscrito(QDate::currentDate());
 
-//   if(repository->saveObject<Usuario>(usuario))
-//   {
-//       qDebug() << QString("%1 - %2 - %3").
-//                   arg(usuario.codigo()).
-//                   arg(usuario.nome()).
-//                   arg(usuario.email());
-//   }
-//   else
-//   {
-//       qDebug() << repository->lastError()->description();
-//       if(repository->lastError()->errorType() == DatabaseError)
-//       {
-//           qDebug() << repository->lastError()->sqlError().text();
-//       }
-//   }
+   if(repository->saveObject<Usuario>(usuario))
+   {
+       qDebug() << QString("%1 - %2 - %3").
+                   arg(usuario.codigo()).
+                   arg(usuario.nome()).
+                   arg(usuario.email());
+   }
+   else
+   {
+       qDebug() << repository->lastError()->description();
+       if(repository->lastError()->errorType() == DatabaseError)
+       {
+           qDebug() << repository->lastError()->sqlError().text();
+       }
+   }
 
    QList<Usuario> list;
-   QList<QPair<QString, OrderBy>> orderby;
-   orderby.append(QPair<QString, OrderBy>("Nome", Asc));
-   if(repository->select<Usuario>(list, orderby, 10))
+   if(repository->select<Usuario>(list, {{"Nome", Asc}, {"Email", Desc}}, 10))
    {
        for(Usuario u: list)
        {
@@ -80,5 +79,9 @@ int main(int argc, char **argv)
        }
    }
 
+   repository->createTable<Usuario>();
+   repository->deleteObject<Usuario>(usuario);
+
+   delete repository;
    return 0;
 }

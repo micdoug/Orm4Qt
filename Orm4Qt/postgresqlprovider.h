@@ -13,7 +13,7 @@ namespace Orm4Qt {
         virtual ~PostgreSqlProvider();
 
         // SqlProvider interface
-        virtual shared_ptr<QSqlQuery> generateCreateTable(Class *reflect);
+        virtual std::shared_ptr<QSqlQuery> generateCreateTable(Class *reflect);
     };
 
 } // namespace Orm4Qt

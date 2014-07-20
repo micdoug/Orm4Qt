@@ -12,7 +12,7 @@ void TestReflectionSystem::initTestCase()
 
 void TestReflectionSystem::validatePropertiesNameAndType()
 {
-    shared_ptr<Orm4Qt::Class> ref = m_person.reflection();
+    std::shared_ptr<Orm4Qt::Class> ref = m_person.reflection();
     //Property m_id
     QVERIFY2(ref->properties()[0]->tags()["name"].toString()=="id", QString("Error on validating name of property '%1'. The name returned was '%2'.")
             .arg("id").arg(ref->properties()[0]->tags()["name"].toString()).toLocal8Bit().data());
@@ -42,7 +42,7 @@ void TestReflectionSystem::validatePropertiesNameAndType()
 
 void TestReflectionSystem::getSetNonPointerValues()
 {
-    shared_ptr<Orm4Qt::Class> ref = m_person.reflection();
+    std::shared_ptr<Orm4Qt::Class> ref = m_person.reflection();
     //Int m_id property
     QVERIFY2(ref->properties()[0]->value().toInt() == 0, QString("Initial value of property '%1' wasn't validated.").
             arg(ref->properties()[0]->tags()["name"].toString()).toLocal8Bit().data());
@@ -67,7 +67,7 @@ void TestReflectionSystem::getSetNonPointerValues()
 
 void TestReflectionSystem::getSetPointerValues()
 {
-    shared_ptr<Orm4Qt::Class> ref = m_person.reflection();
+    std::shared_ptr<Orm4Qt::Class> ref = m_person.reflection();
     //Int *m_age property
     QVERIFY2(ref->properties()[1]->value().toInt() == 0, QString("Initial value of property '%1' wasn't validated.").
             arg(ref->properties()[1]->tags()["name"].toString()).toLocal8Bit().data());
@@ -85,7 +85,7 @@ void TestReflectionSystem::getSetPointerValues()
 
 void TestReflectionSystem::getSetQVariantNonSupportedTypes()
 {
-    shared_ptr<Orm4Qt::Class> ref = m_person.reflection();
+    std::shared_ptr<Orm4Qt::Class> ref = m_person.reflection();
     //std::string m_address property
     QVERIFY2(ref->properties()[5]->value().value<std::string>() == "", QString("Initial value of property '%1' wasn't validated.").
             arg(ref->properties()[5]->tags()["name"].toString()).toLocal8Bit().data());

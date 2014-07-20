@@ -22,14 +22,15 @@ namespace Orm4Qt
          * @return
          * An instance of a repository.
          */
-        static shared_ptr<Repository> createRepository()
+        static std::shared_ptr<Repository> createRepository()
         {
-            return shared_ptr<Repository>(new Repository(sm_createProvider()));
+            return std::shared_ptr<Repository>(new Repository(sm_createProvider()));
         }
         /**
-         * Register a provider to be used as a prototype to create repositories.
+         * Register a provider function that will be used to create the sql providers for the new repositories
+         * returned by createRepository().
          * @param provider
-         * The provider to be used as a prototype.
+         * The function object that creates providers.
          */
         static void registerProvider(std::function<SqlProvider*()> provider)
         {
@@ -48,7 +49,7 @@ namespace Orm4Qt
          */
         Repository(SqlProvider *provider)
         {
-            m_provider = shared_ptr<SqlProvider>(provider);
+            m_provider = std::shared_ptr<SqlProvider>(provider);
         }
         /**
          * Copy constructor
@@ -66,7 +67,7 @@ namespace Orm4Qt
          * Access the last error ocurred.
          * @return
          */
-        shared_ptr<OrmError> lastError() const
+        std::shared_ptr<OrmError> lastError() const
         {
             return m_lastError;
         }
@@ -115,12 +116,12 @@ namespace Orm4Qt
             //Check the scope of the object
             if(object.reflection()->tags()["scope"].toInt() == Scope::Local)
             {
-                m_lastError = shared_ptr<OrmError>(new OrmError(ErrorType::InvalidRequest, QString("This object doesn't exist in the database context.")));
+                m_lastError = std::shared_ptr<OrmError>(new OrmError(ErrorType::InvalidRequest, QString("This object doesn't exist in the database context.")));
                 return false;
             }//Check the scope of the object
 
             //Create the object query
-            shared_ptr<QSqlQuery> query = m_provider->generateDelete(object.reflection().get());
+            std::shared_ptr<QSqlQuery> query = m_provider->generateDelete(object.reflection().get());
 
             //Check errors in the provider
             if(query == nullptr)
@@ -140,7 +141,7 @@ namespace Orm4Qt
                 //Check the number of rows affected
                 if(query->numRowsAffected() < 1)
                 {
-                    m_lastError = shared_ptr<OrmError>(new OrmError(ErrorType::VersionError, QString("The delete failed, because the version number of the object or the values of the primary keys changed after you retrivied this object. You need to check this changes before update."), query->lastError()));
+                    m_lastError = std::shared_ptr<OrmError>(new OrmError(ErrorType::VersionError, QString("The delete failed, because the version number of the object or the values of the primary keys changed after you retrivied this object. You need to check this changes before update."), query->lastError()));
                     return false;
                 }//End check the number of rows affected
                 //Adjust the scope of the object to local
@@ -153,7 +154,7 @@ namespace Orm4Qt
             }
             else
             {
-                m_lastError = shared_ptr<OrmError>(new OrmError(DatabaseError, QString("An error ocurred during the deletion of an object in the database. See the sqlerror attached."), query->lastError()));
+                m_lastError = std::shared_ptr<OrmError>(new OrmError(DatabaseError, QString("An error ocurred during the deletion of an object in the database. See the sqlerror attached."), query->lastError()));
                 return false;
             }//End exec the query
         }
@@ -182,7 +183,7 @@ namespace Orm4Qt
 
             //Try to create the query
             QList<int> indexes = fieldIndexes(temp.reflection().get(), fields);
-            shared_ptr<QSqlQuery> query = m_provider->generateSelect(temp.reflection().get(), where, indexes, orderby, offset, limit);
+            std::shared_ptr<QSqlQuery> query = m_provider->generateSelect(temp.reflection().get(), where, indexes, orderby, offset, limit);
             if(query == nullptr)
             {
                 m_lastError = m_provider->lastError();
@@ -199,7 +200,7 @@ namespace Orm4Qt
                 while(query->next())
                 {
                     T object;
-                    shared_ptr<Class> reflect = object.reflection();
+                    std::shared_ptr<Class> reflect = object.reflection();
                     //Reading the properties
                     int count = 0;
                     for(int index: indexes)
@@ -230,7 +231,7 @@ namespace Orm4Qt
             }
             else
             {
-                m_lastError = shared_ptr<OrmError>(new OrmError(DatabaseError, QString("An error ocurred during the select of records in the database. See the sqlerror attached."), query->lastError()));
+                m_lastError = std::shared_ptr<OrmError>(new OrmError(DatabaseError, QString("An error ocurred during the select of records in the database. See the sqlerror attached."), query->lastError()));
                 return false;
             }
 
@@ -249,7 +250,7 @@ namespace Orm4Qt
             //Create an object of the type required
             T object;
             //Create the query object
-            shared_ptr<QSqlQuery> query = m_provider->generateCreateTable(object.reflection().get());
+            std::shared_ptr<QSqlQuery> query = m_provider->generateCreateTable(object.reflection().get());
             //If the query is invalid an error was generated by the provider
             if(query == nullptr)
             {
@@ -268,7 +269,7 @@ namespace Orm4Qt
             }
             else
             {
-                m_lastError = shared_ptr<OrmError>(new OrmError(DatabaseError, QString("An error ocurred during the table creation in the database. See the sqlerror attached."), query->lastError()));
+                m_lastError = std::shared_ptr<OrmError>(new OrmError(DatabaseError, QString("An error ocurred during the table creation in the database. See the sqlerror attached."), query->lastError()));
                 return false;
             }
         }
@@ -297,6 +298,11 @@ namespace Orm4Qt
             return select(list, Where(), QStringList(), QList<QPair<QString, OrderBy>>(), offset, limit);
         }
 
+        /**
+         * Open a transaction in the database connection.
+         * @return
+         * If the operation was executed with success or not.
+         */
         bool beginTransaction()
         {
             if(!openConnection())
@@ -309,11 +315,16 @@ namespace Orm4Qt
             }
             else
             {
-                m_lastError = shared_ptr<OrmError>(new OrmError(ErrorType::DatabaseError, QString("An error occurred while opening the transaction. See the sql error attached."), db.lastError()));
+                m_lastError = std::shared_ptr<OrmError>(new OrmError(ErrorType::DatabaseError, QString("An error occurred while opening the transaction. See the sql error attached."), db.lastError()));
                 return false;
             }
         }
 
+        /**
+         * Commits the changes of the last transaction opened.
+         * @return
+         * If the operation was executed with success or not.
+         */
         bool commit()
         {
             if(!openConnection())
@@ -326,11 +337,16 @@ namespace Orm4Qt
             }
             else
             {
-                m_lastError = shared_ptr<OrmError>(new OrmError(ErrorType::DatabaseError, QString("An error occurred while commit the transaction. See the sql error attached."), db.lastError()));
+                m_lastError = std::shared_ptr<OrmError>(new OrmError(ErrorType::DatabaseError, QString("An error occurred while commit the transaction. See the sql error attached."), db.lastError()));
                 return false;
             }
         }
 
+        /**
+         * Aborts the changes of the last transaction opened.
+         * @return
+         * If the operation was executed with success or not.
+         */
         bool rollback()
         {
             if(!openConnection())
@@ -343,15 +359,27 @@ namespace Orm4Qt
             }
             else
             {
-                m_lastError = shared_ptr<OrmError>(new OrmError(ErrorType::DatabaseError, QString("An error occurred while rollback the transaction. See the sql error attached."), db.lastError()));
+                m_lastError = std::shared_ptr<OrmError>(new OrmError(ErrorType::DatabaseError, QString("An error occurred while rollback the transaction. See the sql error attached."), db.lastError()));
                 return false;
             }
         }
 
     private:
-        shared_ptr<SqlProvider> m_provider;
-        shared_ptr<OrmError> m_lastError;
+        //Store the sql provider used to create the query objects
+        std::shared_ptr<SqlProvider> m_provider;
+        //Store the description of the last error.
+        std::shared_ptr<OrmError> m_lastError;
 
+        /**
+         * Generate the properties indexes of reflection objects based on a list of field names.
+         * If the list is empty, returns all the properties in the reflection object.
+         * @param reflect
+         * The reflection object with the properties used
+         * @param fields
+         * The list of field names
+         * @return
+         * A list of field indexes
+         */
         QList<int> fieldIndexes(Class *reflect, const QStringList &fields)
         {
             QList<int> indexes;
@@ -388,11 +416,19 @@ namespace Orm4Qt
             }
             else
             {
-                m_lastError = shared_ptr<OrmError>(new OrmError(DatabaseError, QString("An error ocurred on openning connection with the database. See the sqlerror attached."), db.lastError()));
+                m_lastError = std::shared_ptr<OrmError>(new OrmError(DatabaseError, QString("An error ocurred on openning connection with the database. See the sqlerror attached."), db.lastError()));
                 return false;
             }
         }
 
+        /**
+         * Method used to debug the sql commands generated.
+         * Reference: http://stackoverflow.com/questions/5777409/how-to-get-last-prepared-and-executed-query-using-qsqlquery
+         * @param query
+         * The query object used to execute the query
+         * @return
+         * A string with the sql command executed.
+         */
         QString getLastExecutedQuery(const QSqlQuery& query)
         {
             QString sql = query.executedQuery();
@@ -471,7 +507,7 @@ namespace Orm4Qt
             }
 
             //Creating query object
-            shared_ptr<QSqlQuery> query = m_provider->generateInsert(object, indexes);
+            std::shared_ptr<QSqlQuery> query = m_provider->generateInsert(object, indexes);
             //Checking errors in provider
             if(query == nullptr)
             {
@@ -511,7 +547,7 @@ namespace Orm4Qt
             }
             else
             {
-                m_lastError = shared_ptr<OrmError>(new OrmError(DatabaseError, QString("An error ocurred during the insertion of an object in the database. See the sqlerror attached."), query->lastError()));
+                m_lastError = std::shared_ptr<OrmError>(new OrmError(DatabaseError, QString("An error ocurred during the insertion of an object in the database. See the sqlerror attached."), query->lastError()));
                 return false;
             }
         }
@@ -560,7 +596,7 @@ namespace Orm4Qt
             }//End remove all the keys from the update list
 
             //Create a new query object
-            shared_ptr<QSqlQuery> query = m_provider->generateUpdate(object, indexes);
+            std::shared_ptr<QSqlQuery> query = m_provider->generateUpdate(object, indexes);
 
             //Checking errors in provider
             if(query == nullptr)
@@ -581,7 +617,7 @@ namespace Orm4Qt
                 if(query->numRowsAffected() < 1)
                 {
                     object->removeTag("newversion");
-                    m_lastError = shared_ptr<OrmError>(new OrmError(ErrorType::VersionError, QString("The update failed, because the version number of the object or the values of the primary keys changed after you retrivied this object. You need to check this changes before update."), query->lastError()));
+                    m_lastError = std::shared_ptr<OrmError>(new OrmError(ErrorType::VersionError, QString("The update failed, because the version number of the object or the values of the primary keys changed after you retrivied this object. You need to check this changes before update."), query->lastError()));
                     return false;
                 }
                 else
@@ -598,7 +634,7 @@ namespace Orm4Qt
             else
             {
                 object->removeTag("newversion");
-                m_lastError = shared_ptr<OrmError>(new OrmError(ErrorType::DatabaseError, QString("An error ocurred during the update of an object in the database. See the sqlerror attached."), query->lastError()));
+                m_lastError = std::shared_ptr<OrmError>(new OrmError(ErrorType::DatabaseError, QString("An error ocurred during the update of an object in the database. See the sqlerror attached."), query->lastError()));
                 return false;
             }
         }

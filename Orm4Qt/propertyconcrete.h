@@ -5,8 +5,6 @@
 #include <functional>
 #include <type_traits>
 
-using namespace std;
-
 namespace Orm4Qt
 {
     template<typename T>
@@ -14,7 +12,7 @@ namespace Orm4Qt
     {
     public:
         //Constructors and destructors
-        explicit PropertyConcrete(function<T&()> func, const QHash<QString, QVariant> &tags = QHash<QString, QVariant>()):
+        explicit PropertyConcrete(std::function<T&()> func, const QHash<QString, QVariant> &tags = QHash<QString, QVariant>()):
             Property(tags), m_function(func)
         {}
         PropertyConcrete(const PropertyConcrete &other) :
@@ -51,7 +49,7 @@ namespace Orm4Qt
         }
 
     private:
-        function<T&()> m_function;
+        std::function<T&()> m_function;
     };
 
     template<typename T>
@@ -59,7 +57,7 @@ namespace Orm4Qt
     {
     public:
         //Constructors and destructors
-        explicit PropertyConcrete(function<T*&()> func, const QHash<QString, QVariant> &tags = QHash<QString, QVariant>()):
+        explicit PropertyConcrete(std::function<T*&()> func, const QHash<QString, QVariant> &tags = QHash<QString, QVariant>()):
             Property(tags), m_function(func)
         {}
         explicit PropertyConcrete(const PropertyConcrete &other) :
@@ -105,7 +103,7 @@ namespace Orm4Qt
         }
 
     private:
-        function<T*&()> m_function;
+        std::function<T*&()> m_function;
     };
 }
 

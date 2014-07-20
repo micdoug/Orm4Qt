@@ -18,7 +18,7 @@ PostgreSqlProvider::PostgreSqlProvider(const QString &user, const QString &passw
 PostgreSqlProvider::~PostgreSqlProvider()
 {}
 
-shared_ptr<QSqlQuery> PostgreSqlProvider::generateCreateTable(Class *reflect)
+std::shared_ptr<QSqlQuery> PostgreSqlProvider::generateCreateTable(Class *reflect)
 {
     return nullptr;
 }

@@ -12,10 +12,10 @@ namespace Orm4Qt
         virtual ~StandardSqlProvider();
 
         // SqlProvider interface
-        virtual shared_ptr<QSqlQuery> generateInsert(Class *reflect, const QList<int> &fieldsno) override;
-        virtual shared_ptr<QSqlQuery> generateUpdate(Class *reflect, const QList<int> &fieldsno) override;
-        virtual shared_ptr<QSqlQuery> generateDelete(Class *reflect) override;
-        virtual shared_ptr<QSqlQuery> generateSelect(Class *reflect, const Where &where, const QList<int> &fieldsno,
+        virtual std::shared_ptr<QSqlQuery> generateInsert(Class *reflect, const QList<int> &fieldsno) override;
+        virtual std::shared_ptr<QSqlQuery> generateUpdate(Class *reflect, const QList<int> &fieldsno) override;
+        virtual std::shared_ptr<QSqlQuery> generateDelete(Class *reflect) override;
+        virtual std::shared_ptr<QSqlQuery> generateSelect(Class *reflect, const Where &where, const QList<int> &fieldsno,
                                                      const QList<QPair<QString, OrderBy>> orderby = QList<QPair<QString, OrderBy>>(),
                                                      int offset=-1, int limit = -1) override;
     };
