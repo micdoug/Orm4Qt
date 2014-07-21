@@ -8,15 +8,11 @@
 #include "where.h"
 #include "class.h"
 #include "ormerror.h"
+#include "orderbylist.h"
 #include <memory>
 
 namespace Orm4Qt
 {
-    enum OrderBy
-    {
-        Asc,
-        Desc
-    };
     class SqlProvider
     {
     public:

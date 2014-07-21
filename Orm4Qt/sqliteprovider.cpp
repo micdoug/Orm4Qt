@@ -80,6 +80,7 @@ std::shared_ptr<QSqlQuery> SqliteProvider::generateCreateTable(Class *reflect)
             //Defining the type of the column
             switch(prop->type())
             {
+                case QMetaType::Bool:
                 case QMetaType::Int:
                 case QMetaType::UInt:
                 case QMetaType::Short:
@@ -127,7 +128,12 @@ std::shared_ptr<QSqlQuery> SqliteProvider::generateCreateTable(Class *reflect)
             } //End check if the column is a key
 
             //Check if the property is required or not
-            if(!prop->tags()["required"].toBool() && prop->isPointer())
+            if(!prop->tags()["required"].toBool() && (prop->isPointer() ||
+                                                      prop->type() == QMetaType::QDate ||
+                                                      prop->type() == QMetaType::QDateTime ||
+                                                      prop->type() == QMetaType::QTime ||
+                                                      prop->type() == QMetaType::QString ||
+                                                      prop->type() == QMetaType::QByteArray))
             {
                 sql << "NULL ";
             }
@@ -165,7 +171,7 @@ std::shared_ptr<QSqlQuery> SqliteProvider::generateCreateTable(Class *reflect)
     //Create a query object using the database connection with the name supplied
     std::shared_ptr<QSqlQuery> query(new QSqlQuery(QSqlDatabase::database(databaseConnectionName())));
     //Check if the query is valid and can be exec
-    if(query->prepare(sqlstr))
+    if(query->exec(sqlstr))
     {
         return query;
     }

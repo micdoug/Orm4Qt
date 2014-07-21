@@ -199,8 +199,8 @@ namespace Orm4Qt
                 //Reading the result
                 while(query->next())
                 {
-                    T object;
-                    std::shared_ptr<Class> reflect = object.reflection();
+                    list.append(T());
+                    std::shared_ptr<Class> reflect = list.last().reflection();
                     //Reading the properties
                     int count = 0;
                     for(int index: indexes)
@@ -224,8 +224,7 @@ namespace Orm4Qt
                         ++count;
                     }
                     //Adjust the scope of the object
-                    object.reflection()->replaceTag("scope", Scope::Remote);
-                    list.append(object);
+                    reflect->replaceTag("scope", Scope::Remote);
                 }
                 return true;
             }
@@ -262,16 +261,9 @@ namespace Orm4Qt
             //Debug the sql generated
             qCDebug(ORM4QT_SL) << getLastExecutedQuery(*query.get());
 #endif
-            //Try to execute the query
-            if(query->exec())
-            {
-                return true;
-            }
-            else
-            {
-                m_lastError = std::shared_ptr<OrmError>(new OrmError(DatabaseError, QString("An error ocurred during the table creation in the database. See the sqlerror attached."), query->lastError()));
-                return false;
-            }
+
+            //The provider executed the create table statement
+            return true;
         }
 
         template<class T>
@@ -281,7 +273,7 @@ namespace Orm4Qt
         }
 
         template<class T>
-        bool select(QList<T> &list, const Where &where, const QList<QPair<QString, OrderBy>> orderby = QList<QPair<QString, OrderBy>>(), int limit=-1, int offset = 0)
+        bool select(QList<T> &list, const Where &where, const QList<QPair<QString, OrderBy>> orderby, int limit=-1, int offset = 0)
         {
             return select(list, where, QStringList(), orderby, offset, limit);
         }

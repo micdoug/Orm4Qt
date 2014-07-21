@@ -1,7 +1,11 @@
 #ifndef ANNOTATIONS_H
 #define ANNOTATIONS_H
 
+#ifndef ORM4QT_STDSTRING
 #include "propertyconcrete.h"
+#else
+#include "propertyconcretestdstring.h"
+#endif
 #include "class.h"
 #include <memory>
 #include "log.h"
@@ -38,18 +42,19 @@
 #define CLASS(...) \
         m_reflectionObject->addTagsFromString(#__VA_ARGS__); \
     }\
-    else \
-    {\
-        return m_reflectionObject; \
-    }\
+    m_reflectionObject->clearProperties(); \
     Orm4Qt::Property *p = nullptr;
 
 #define PROPERTY(NAME, ...) \
     DEBUG_CREATE_PROPERTY(NAME) \
-    p = new Orm4Qt::PropertyConcrete<decltype(NAME)>(std::bind(std::mem_fn(&std::remove_pointer<decltype(this)>::type::NAME), this)); \
+    p = new Orm4Qt::PropertyConcrete<decltype(NAME)>([&]() -> decltype(NAME)& { return this->NAME; }); \
     p->addTagsFromString(#__VA_ARGS__); \
     p->addTag("name", #NAME); \
     m_reflectionObject->addProperty(p);\
     DEBUG_FINISH_PROPERTY(NAME)
+//p = new Orm4Qt::PropertyConcrete<decltype(NAME)>(std::bind(std::mem_fn(&std::remove_pointer<decltype(this)>::type::NAME), this));
+//p = new Orm4Qt::PropertyConcrete<decltype(NAME)>([&]() -> decltype(NAME)& { return this->NAME; });
+
+#define COPYTAGS(OTHER) m_reflectionObject(OTHER.m_reflectionObject)
 
 #endif // ANNOTATIONS_H

@@ -21,7 +21,8 @@ SOURCES += \
     where.cpp \
     sqliteprovider.cpp \
     standardsqlprovider.cpp \
-    postgresqlprovider.cpp
+    postgresqlprovider.cpp \
+    orderbylist.cpp
 
 HEADERS += \
     reflect.h \
@@ -36,7 +37,9 @@ HEADERS += \
     repository.h \
     sqliteprovider.h \
     standardsqlprovider.h \
-    postgresqlprovider.h
+    postgresqlprovider.h \
+    orderbylist.h \
+    propertyconcretestdstring.h
 unix {
     target.path = /usr/lib
     INSTALLS += target
