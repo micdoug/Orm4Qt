@@ -22,7 +22,8 @@ SOURCES += \
     sqliteprovider.cpp \
     standardsqlprovider.cpp \
     postgresqlprovider.cpp \
-    orderbylist.cpp
+    orderbylist.cpp \
+    repository.cpp
 
 HEADERS += \
     reflect.h \

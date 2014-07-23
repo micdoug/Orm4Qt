@@ -633,9 +633,6 @@ namespace Orm4Qt
 
     };
 
-    //Initializing static members
-    std::function<SqlProvider*()> Repository::sm_createProvider = [](){ return nullptr; };
-
 }
 
 #endif // REPOSITORY_H
