@@ -449,6 +449,10 @@ namespace Orm4Qt
                     {
                         field.clear();
                     }
+                    if(var.type() == QMetaType::QByteArray)
+                    {
+                        field.setValue(QByteArray("BLOB"));
+                    }
                     else
                     {
                         field.setValue(var);
