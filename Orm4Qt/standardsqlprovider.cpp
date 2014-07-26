@@ -534,6 +534,15 @@ std::shared_ptr<QSqlQuery> StandardSqlProvider::generateSelect(Class *reflect, c
                     break;
                 }
             }
+            //Check if the orderby refers to the autoid
+            if(!reflect->tags()["autoid"].isNull() && order.first == "autoid")
+            {
+                sql << reflect->tags()["autoid"].toString() << " ";
+                if(order.second == OrderBy::Asc)
+                    sql << "ASC, ";
+                else
+                    sql << "DESC, ";
+            }//Check if the orderby refers to the autoid
         }
 
         //Remove the last ", " from the command
