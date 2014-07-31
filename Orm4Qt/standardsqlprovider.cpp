@@ -578,3 +578,191 @@ std::shared_ptr<QSqlQuery> StandardSqlProvider::generateSelect(Class *reflect, c
     }
 
 }
+
+std::shared_ptr<QSqlQuery> StandardSqlProvider::generateCount(Class *reflect, const Where &where)
+{
+    //Objects to store the sql command
+    QString sqlstr;
+    QTextStream sql(&sqlstr);
+
+    //Begin the statement
+    sql << "SELECT COUNT(*) ";
+
+    //Insert the table name
+    sql << " FROM ";
+    if(reflect->tags()["table"].isNull())
+    {
+        m_lastError = std::shared_ptr<OrmError>(new OrmError(ErrorType::ConfigurationError, QString("The tag 'table' was not supplied for the class '%1'.").arg(reflect->tags()["name"].toString())));
+        return nullptr;
+    }
+    else
+    {
+        sql << reflect->tags()["table"].toString() << " ";
+    }//End insert the table name
+
+    //Check if where is used
+    QMap<QString, QVariant> bindings; //The list of bindings used int the where clause
+    if(where.operation() != WhereOp::NoOperation)
+    {
+        //Init the where clause
+        QString wherestr = "WHERE ";
+        const Where *whereptr = &where;
+        //Iterating over the where clauses joined
+        while(whereptr)
+        {
+            QString field; //Store the name of the field used in the comparison
+
+            //Check if the field is the autoid
+            if(whereptr->field()=="autoid")
+            {
+                field = reflect->tags()["autoid"].toString();
+            }
+            //Check if the field is one of the properties in the object
+            else
+            {
+                //Iterating over the properties  to be selected
+                for(Property *prop: reflect->properties())
+                {
+                    if(prop->tags()["name"].toString()==whereptr->field())
+                    {
+                        field = prop->tags()["column"].toString();
+                        break;
+                    }
+                } //End iterating over the properties to be selected
+            }
+
+            //Check if the field name is valid
+            if(field.isNull())
+            {
+                //If the field is invalid ignore this clause and check the next
+                whereptr = whereptr->joined();
+                continue;
+            }
+            //Field is valid
+            else
+            {
+                //Check if is necessary to open a block of precedence
+                if(whereptr->precede()==WherePrecede::Begin)
+                    wherestr += "(";
+
+                //Include the name of the field in the where clause
+                wherestr += field + " ";
+            }
+
+            //Prepare the field to be used as a placeholder
+            field.prepend(":");
+            //Char used to diff multiple arguments
+            char diff = 'a';
+            //Check the type of operation
+            switch(whereptr->operation())
+            {
+                case WhereOp::Equals:
+                    wherestr += QString("= %1 ").arg(field);
+                    bindings.insert(field, whereptr->arguments().first());
+                    break;
+                case WhereOp::NotEquals:
+                    wherestr += QString("<> %1 ").arg(field);
+                    bindings.insert(field, whereptr->arguments().first());
+                    break;
+                case WhereOp::GreaterThan:
+                    wherestr += QString("> %1 ").arg(field);
+                    bindings.insert(field, whereptr->arguments().first());
+                    break;
+                case WhereOp::GreaterEqual:
+                    wherestr += QString(">= %1 ").arg(field);;
+                    bindings.insert(field, whereptr->arguments().first());
+                    break;
+                case WhereOp::LessThan:
+                    wherestr += QString("< %1 ").arg(field);
+                    bindings.insert(field, whereptr->arguments().first());
+                    break;
+                case WhereOp::LessEqual:
+                    wherestr += QString("<= %1 ").arg(field);
+                    bindings.insert(field, whereptr->arguments().first());
+                    break;
+                case WhereOp::Contains:
+                    wherestr += QString("LIKE '%%1%' ").arg(whereptr->arguments().first().toString());
+                    break;
+                case WhereOp::EndsWith:
+                    wherestr += QString("LIKE '%1%2' ").arg("%").arg(whereptr->arguments().first().toString());
+                    break;
+                case WhereOp::StartsWith:
+                    wherestr += QString("LIKE '%1%2' ").arg(whereptr->arguments().first().toString()).arg("%");
+                    break;
+                case WhereOp::Like:
+                    wherestr += QString("LIKE '%1'").arg(whereptr->arguments().first().toString());
+                    break;
+                case WhereOp::In:
+                    wherestr += QString("IN (");
+                    for(QVariant value: whereptr->arguments())
+                    {
+                        wherestr += QString("%1, ").arg(field+diff);
+                        bindings.insert(field+diff, value);
+                        ++diff;
+                    }
+                    wherestr = wherestr.left(wherestr.size()-2)+") ";
+                    break;
+                case WhereOp::NotIn:
+                    wherestr += QString("NOT IN (");
+                    for(QVariant value: whereptr->arguments())
+                    {
+                        wherestr += QString("%1, ").arg(field+diff);
+                        bindings.insert(field+diff, value);
+                        ++diff;
+                    }
+                    wherestr = wherestr.left(wherestr.size()-2)+") ";
+                    break;
+                default:
+                    m_lastError = std::shared_ptr<OrmError>(new OrmError(ErrorType::OperationNotSupported, QString("This type of comparison is not supported by this sql provider.")));
+                    return nullptr;
+            } //End check the type of operation
+
+            //Check if is necessary to close a block of precedence
+            if(whereptr->precede()==WherePrecede::End)
+                wherestr = wherestr.trimmed() + ") ";
+
+            //Check if this where is joined
+            switch(whereptr->join())
+            {
+                case WhereJoin::And:
+                    wherestr += "AND ";
+                    break;
+                case WhereJoin::Or:
+                    wherestr += "OR ";
+                    break;
+                case WhereJoin::NoJoin:
+                    whereptr = nullptr;
+                    continue;
+            } //Check if this where is joined
+
+            //Adjust the next where clause to analize
+            whereptr = whereptr->joined();
+        } //End iterating over the where clauses joined
+
+        //Include the where clause in the sql statement
+        sql << wherestr;
+    } //End check if where is used
+
+    //Create a new query object
+    std::shared_ptr<QSqlQuery> query(new QSqlQuery(QSqlDatabase::database(databaseConnectionName())));
+
+    //Check if the sql statement is valid
+    if(query->prepare(sqlstr))
+    {
+        //Bind the values registered in the where clause
+        for(auto iter=bindings.begin(); iter!=bindings.end(); ++iter)
+        {
+            query->bindValue(iter.key(), iter.value());
+        } //End bind the values registered in the where clause
+
+        //Return the query
+        return query;
+    }
+    //If the sql statement is invalid raise an error
+    else
+    {
+        m_lastError = std::shared_ptr<OrmError>(new OrmError(ErrorType::DatabaseError, QString("Invalid SQL statement for count. See the sqlerror attached."), query->lastError()));
+        return nullptr;
+    }
+
+}

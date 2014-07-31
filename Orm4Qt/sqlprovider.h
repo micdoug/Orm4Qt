@@ -25,6 +25,7 @@ namespace Orm4Qt
         virtual std::shared_ptr<QSqlQuery> generateSelect(Class *reflect, const Where &where, const QList<int> &fieldsno,
                                                      const QList<QPair<QString, OrderBy>> orderby = QList<QPair<QString, OrderBy>>(),
                                                      int offset=-1, int limit = -1) = 0;
+        virtual std::shared_ptr<QSqlQuery> generateCount(Class *reflect, const Where &where) = 0;
         virtual std::shared_ptr<QSqlQuery> generateCreateTable(Class *reflect) = 0;
         std::shared_ptr<OrmError> lastError() const;
     private:

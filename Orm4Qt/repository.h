@@ -160,6 +160,50 @@ namespace Orm4Qt
         }
 
         /**
+         * Execute a "Select count(*)" in the database to retrieve the quantity of registers.
+         * @param result
+         * The variable used to store the result
+         * @param where
+         * The conditions used in the sql statement
+         * @return
+         * If the operation was executed with success or not.
+         */
+        template<class T>
+        bool count(int &result, const Where &where = Where())
+        {
+            //Try to open connection with the database
+            if(!openConnection())
+                return false;
+
+            //Create an object of the type to be selected to obtain the reflection object
+            T temp;
+
+            //Try to create the query
+            std::shared_ptr<QSqlQuery> query = m_provider->generateCount(temp.reflection().get(), where);
+            if(query == nullptr)
+            {
+                m_lastError = m_provider->lastError();
+                return false;
+            }
+#ifdef ORM4QT_DEBUG_SL
+            //Debug the sql generated
+            qCDebug(ORM4QT_SL) << getLastExecutedQuery(*query.get());
+#endif
+            //Try execute the query
+            if(query->exec() && query->next())
+            {
+                result = query->value(0).toInt();
+                return true;
+            }
+            else
+            {
+                m_lastError = std::shared_ptr<OrmError>(new OrmError(DatabaseError, QString("An error ocurred during the count of records in the database. See the sqlerror attached."), query->lastError()));
+                return false;
+            }
+
+        }
+
+        /**
          * Select a list of objects in the database based on the conditions tested and the fields required
          * @param list
          * The list to be filled with the objects selected.
@@ -172,7 +216,7 @@ namespace Orm4Qt
          */
         template<class T>
         bool select(QList<T> &list, const Where &where = Where(), const QStringList &fields = QStringList(),
-                    const QList<QPair<QString, OrderBy>> orderby = QList<QPair<QString, OrderBy>>(), int offset=-1, int limit=-1)
+                    const QList<QPair<QString, OrderBy>> orderby = QList<QPair<QString, OrderBy>>(), int limit=-1, int offset=-1)
         {
             //Try to open connection with the database
             if(!openConnection())
@@ -269,25 +313,25 @@ namespace Orm4Qt
         template<class T>
         bool select(QList<T> &list, const QStringList &fields, const QList<QPair<QString, OrderBy>> orderby = QList<QPair<QString, OrderBy>>(), int limit=-1, int offset = 0)
         {
-            return select(list, Where(), fields, orderby, offset, limit);
+            return select(list, Where(), fields, orderby, limit, offset);
         }
 
         template<class T>
         bool select(QList<T> &list, const Where &where, const QList<QPair<QString, OrderBy>> orderby, int limit=-1, int offset = 0)
         {
-            return select(list, where, QStringList(), orderby, offset, limit);
+            return select(list, where, QStringList(), orderby, limit, offset);
         }
 
         template<class T>
         bool select(QList<T> &list, const QList<QPair<QString, OrderBy>> orderby, int limit=-1, int offset = 0)
         {
-            return select(list, Where(), QStringList(), orderby, offset, limit);
+            return select(list, Where(), QStringList(), orderby, limit, offset);
         }
 
         template<class T>
         bool select(QList<T> &list, int limit, int offset=0)
         {
-            return select(list, Where(), QStringList(), QList<QPair<QString, OrderBy>>(), offset, limit);
+            return select(list, Where(), QStringList(), QList<QPair<QString, OrderBy>>(), limit, offset);
         }
 
         /**
@@ -449,7 +493,7 @@ namespace Orm4Qt
                     {
                         field.clear();
                     }
-                    if(var.type() == QMetaType::QByteArray)
+                    if(var.type() == QVariant::ByteArray)
                     {
                         field.setValue(QByteArray("BLOB"));
                     }
