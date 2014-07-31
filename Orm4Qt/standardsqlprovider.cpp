@@ -431,7 +431,7 @@ std::shared_ptr<QSqlQuery> StandardSqlProvider::generateSelect(Class *reflect, c
                     wherestr += QString("> %1 ").arg(field);
                     bindings.insert(field, whereptr->arguments().first());
                     break;
-                case WhereOp::GreaterEqual:
+                case WhereOp::GreaterEquals:
                     wherestr += QString(">= %1 ").arg(field);;
                     bindings.insert(field, whereptr->arguments().first());
                     break;
@@ -439,7 +439,7 @@ std::shared_ptr<QSqlQuery> StandardSqlProvider::generateSelect(Class *reflect, c
                     wherestr += QString("< %1 ").arg(field);
                     bindings.insert(field, whereptr->arguments().first());
                     break;
-                case WhereOp::LessEqual:
+                case WhereOp::LessEquals:
                     wherestr += QString("<= %1 ").arg(field);
                     bindings.insert(field, whereptr->arguments().first());
                     break;
@@ -668,7 +668,7 @@ std::shared_ptr<QSqlQuery> StandardSqlProvider::generateCount(Class *reflect, co
                     wherestr += QString("> %1 ").arg(field);
                     bindings.insert(field, whereptr->arguments().first());
                     break;
-                case WhereOp::GreaterEqual:
+                case WhereOp::GreaterEquals:
                     wherestr += QString(">= %1 ").arg(field);;
                     bindings.insert(field, whereptr->arguments().first());
                     break;
@@ -676,7 +676,7 @@ std::shared_ptr<QSqlQuery> StandardSqlProvider::generateCount(Class *reflect, co
                     wherestr += QString("< %1 ").arg(field);
                     bindings.insert(field, whereptr->arguments().first());
                     break;
-                case WhereOp::LessEqual:
+                case WhereOp::LessEquals:
                     wherestr += QString("<= %1 ").arg(field);
                     bindings.insert(field, whereptr->arguments().first());
                     break;

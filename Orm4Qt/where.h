@@ -15,9 +15,9 @@ namespace Orm4Qt
         Equals,
         NotEquals,
         GreaterThan,
-        GreaterEqual,
+        GreaterEquals,
         LessThan,
-        LessEqual,
+        LessEquals,
         Contains,
         StartsWith,
         EndsWith,
@@ -58,7 +58,9 @@ namespace Orm4Qt
         const QString &field() const;
         const QList<QVariant> &arguments() const;
         virtual Where& And(const Where &where);
+        virtual Where& And(const QString &field, WhereOp op, const QList<QVariant> &arguments, WherePrecede precede=WherePrecede::NoPrecede);
         virtual Where& Or(const Where &where);
+        virtual Where& Or(const QString &field, WhereOp op, const QList<QVariant> &arguments, WherePrecede precede=WherePrecede::NoPrecede);
     private:
         QString m_field;
         WhereOp m_operation;

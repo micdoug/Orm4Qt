@@ -130,6 +130,12 @@ Where &Where::And(const Where &where)
     return *this;
 }
 
+Where &Where::And(const QString &field, WhereOp op, const QList<QVariant> &arguments, WherePrecede precede)
+{
+    Where where(field, op, arguments, precede);
+    return And(where);
+}
+
 /**
  * Join this instance with other where instance using the join of type Or
  * @param where
@@ -149,5 +155,11 @@ Where &Where::Or(const Where &where)
         m_join = WhereJoin::Or;
     }
     return *this;
+}
+
+Where &Where::Or(const QString &field, WhereOp op, const QList<QVariant> &arguments, WherePrecede precede)
+{
+    Where where(field, op, arguments, precede);
+    return Or(where);
 }
 
