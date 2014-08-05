@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QTableView" name="tableView">
+      <property name="alternatingRowColors">
+       <bool>true</bool>
+      </property>
+      <property name="sortingEnabled">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>400</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu_File">
+    <property name="title">
+     <string>&amp;File</string>
+    </property>
+    <addaction name="actionConfigure_Database"/>
+    <addaction name="actionCreate_Table"/>
+    <addaction name="actionRefreshPeople"/>
+    <addaction name="separator"/>
+    <addaction name="actionClose"/>
+   </widget>
+   <widget class="QMenu" name="menu_About">
+    <property name="title">
+     <string>&amp;About</string>
+    </property>
+    <addaction name="actionAbout_Qt"/>
+   </widget>
+   <widget class="QMenu" name="menu_Edit">
+    <property name="title">
+     <string>&amp;Edit</string>
+    </property>
+    <addaction name="actionAdd_Person"/>
+    <addaction name="actionDelete_Person"/>
+    <addaction name="actionEdit_Person"/>
+   </widget>
+   <addaction name="menu_File"/>
+   <addaction name="menu_Edit"/>
+   <addaction name="menu_About"/>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <action name="actionAbout_Qt">
+   <property name="text">
+    <string>About Qt</string>
+   </property>
+   <property name="toolTip">
+    <string>Show the Qt version used</string>
+   </property>
+  </action>
+  <action name="actionClose">
+   <property name="text">
+    <string>Close</string>
+   </property>
+   <property name="toolTip">
+    <string>Close the application</string>
+   </property>
+  </action>
+  <action name="actionConfigure_Database">
+   <property name="text">
+    <string>Configure Database</string>
+   </property>
+   <property name="toolTip">
+    <string>Configure the database connection</string>
+   </property>
+  </action>
+  <action name="actionCreate_Table">
+   <property name="text">
+    <string>Create Table</string>
+   </property>
+   <property name="toolTip">
+    <string>Execute the create table in the database</string>
+   </property>
+  </action>
+  <action name="actionAdd_Person">
+   <property name="text">
+    <string>Add Person</string>
+   </property>
+   <property name="toolTip">
+    <string>Add a new person</string>
+   </property>
+  </action>
+  <action name="actionDelete_Person">
+   <property name="text">
+    <string>Delete Person</string>
+   </property>
+  </action>
+  <action name="actionEdit_Person">
+   <property name="text">
+    <string>Edit Person</string>
+   </property>
+   <property name="toolTip">
+    <string>Edit the information of the actual register</string>
+   </property>
+  </action>
+  <action name="actionRefreshPeople">
+   <property name="text">
+    <string>Refresh</string>
+   </property>
+   <property name="toolTip">
+    <string>Refresh the registers in the table view</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>actionClose</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>199</x>
+     <y>149</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>
