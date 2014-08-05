@@ -45,16 +45,16 @@ ExampleClass::ExampleClass(const ExampleClass &other) : COPYTAGS(other) {}
 ##############################################################################
 
 Insert:
-	INSERT INTO <TABLE> ([field1], [field2], ..., [version]) VALUES ([value1], [value2], ..., [0])
+	INSERT INTO TABLE ([field1], [field2], ..., [version]) VALUES ([value1], [value2], ..., [0])
 
 Update:
-	UPDATE <TABLE> SET [field1] = [value1], ..., [version] = [1] WHERE [pk1] = [valuePK1], ..., [autoid] = [id], [version] = [0]
+	UPDATE TABLE SET [field1] = [value1], ..., [version] = [1] WHERE [pk1] = [valuePK1], ..., [autoid] = [id], [version] = [0]
 
 Delete:
-	DELETE FROM <TABLE> WHERE [pk1] = [valuePK1], ..., [autoid] = [id], [version] = [0]
+	DELETE FROM TABLE WHERE [pk1] = [valuePK1], ..., [autoid] = [id], [version] = [0]
 
 Select:
-	SELECT [field1], [field2], ..., [version], [autoid] FROM <TABLE> [WHERE <CONDITIONS>] [ORDER BY <ORDERBYLIST>] [LIMIT <number> OFFSET <number>]
+	SELECT [field1], [field2], ..., [version], [autoid] FROM TABLE [WHERE CONDITIONS] [ORDER BY ORDERBYLIST] [LIMIT number OFFSET number]
 
 ###############################################################################
 ##			                        More information                				     ##
