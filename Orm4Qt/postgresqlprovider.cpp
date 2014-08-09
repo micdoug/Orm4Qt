@@ -100,6 +100,8 @@ std::shared_ptr<QSqlQuery> PostgreSqlProvider::generateCreateTable(Class *reflec
             {
                 switch(prop->type())
                 {
+                    case QMetaType::Char:
+                        sql << "CHAR ";
                     case QMetaType::Bool:
                         sql << "BOOLEAN ";
                         break;
@@ -122,7 +124,7 @@ std::shared_ptr<QSqlQuery> PostgreSqlProvider::generateCreateTable(Class *reflec
                         sql << "DECIMAL ";
                         break;
                     case QMetaType::QByteArray:
-                        sql << "BLOB ";
+                        sql << "BYTEA ";
                         break;
                     case QMetaType::QString:
                         if(!prop->tags()["maxlength"].isNull())

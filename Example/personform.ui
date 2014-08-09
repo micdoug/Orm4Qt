@@ -127,6 +127,15 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>nameEdit</tabstop>
+  <tabstop>emailEdit</tabstop>
+  <tabstop>birthdayEdit</tabstop>
+  <tabstop>balanceEdit</tabstop>
+  <tabstop>ageEdit</tabstop>
+  <tabstop>resumeDownloadButton</tabstop>
+  <tabstop>resumeUploadButton</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>

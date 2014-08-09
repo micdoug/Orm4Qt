@@ -30,6 +30,8 @@ FORMS    += mainwindow.ui \
     personform.ui \
     configuredatabaseform.ui
 
+DEFINES += ORM4QT_DEBUG_SL
+
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../Orm4Qt/release/ -lOrm4Qt
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../Orm4Qt/debug/ -lOrm4Qt
 else:unix: LIBS += -L$$OUT_PWD/../Orm4Qt/ -lOrm4Qt

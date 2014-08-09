@@ -511,15 +511,19 @@ namespace Orm4Qt
                     {
                         field.clear();
                     }
-                    if(var.type() == QVariant::ByteArray)
-                    {
-                        field.setValue(QByteArray("BLOB"));
-                    }
                     else
                     {
                         field.setValue(var);
                     }
-                    QString formatV = query.driver()->formatValue(field);
+                    QString formatV;
+                    if(var.type() == QVariant::ByteArray && !var.isNull())
+                    {
+                        formatV = QString("\"BLOB\"");
+                    }
+                    else
+                    {
+                        formatV = query.driver()->formatValue(field);
+                    }
                     sql.replace(i, 1, formatV);
                     i += formatV.length();
                     ++j;
