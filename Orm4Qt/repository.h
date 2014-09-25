@@ -234,7 +234,7 @@ namespace Orm4Qt
          */
         template<class T>
         bool select(QList<T> &list, const Where &where = Where(), const QStringList &fields = QStringList(),
-                    const QList<QPair<QString, OrderBy>> orderby = QList<QPair<QString, OrderBy>>(), int limit=-1, int offset=-1)
+                    const QList<QPair<QString, OrderBy>> orderby = QList<QPair<QString, OrderBy>>(), int limit=-1, int offset=0)
         {
             //Try to open connection with the database
             if(!openConnection())
@@ -331,26 +331,94 @@ namespace Orm4Qt
         template<class T>
         bool select(QList<T> &list, const QStringList &fields, const QList<QPair<QString, OrderBy>> orderby = QList<QPair<QString, OrderBy>>(), int limit=-1, int offset = 0)
         {
-            return select(list, Where(), fields, orderby, limit, offset);
+            return select<T>(list, Where(), fields, orderby, limit, offset);
         }
 
         template<class T>
         bool select(QList<T> &list, const Where &where, const QList<QPair<QString, OrderBy>> orderby, int limit=-1, int offset = 0)
         {
-            return select(list, where, QStringList(), orderby, limit, offset);
+            return select<T>(list, where, QStringList(), orderby, limit, offset);
         }
 
         template<class T>
         bool select(QList<T> &list, const QList<QPair<QString, OrderBy>> orderby, int limit=-1, int offset = 0)
         {
-            return select(list, Where(), QStringList(), orderby, limit, offset);
+            return select<T>(list, Where(), QStringList(), orderby, limit, offset);
         }
 
         template<class T>
         bool select(QList<T> &list, int limit, int offset=0)
         {
-            return select(list, Where(), QStringList(), QList<QPair<QString, OrderBy>>(), limit, offset);
+            return select<T>(list, Where(), QStringList(), QList<QPair<QString, OrderBy>>(), limit, offset);
         }
+
+        template<class T>
+        bool select(QList<T> &list, const Where &where, int limit, int offset=0)
+        {
+            return select<T>(list, where, QStringList(), QList<QPair<QString, OrderBy>>(), limit, offset);
+        }
+
+        template<class T>
+        bool selectValueList(QList<QVariant> &list, const QString &field, const Where &where = Where(),
+                             const QList<QPair<QString, OrderBy>> orderby = QList<QPair<QString, OrderBy>>(), int limit=-1, int offset=0)
+        {
+            //Try to open connection with the database
+            if(!openConnection())
+                return false;
+
+            //Create an object of the type to be selected to obtain the reflection object
+            T temp;
+
+            //Try to create the query
+            QList<int> indexes = fieldIndexes(temp.reflection().get(), {field});
+            std::shared_ptr<QSqlQuery> query = m_provider->generateSelect(temp.reflection().get(), where, indexes, orderby, offset, limit);
+            if(query == nullptr)
+            {
+                m_lastError = m_provider->lastError();
+                return false;
+            }
+#ifdef ORM4QT_DEBUG_SL
+            //Debug the sql generated
+            qCDebug(ORM4QT_SL) << getLastExecutedQuery(*query.get());
+#endif
+            //Try execute the query
+            if(query->exec())
+            {
+                //Reading the result
+                while(query->next())
+                {
+                    list.append(query->value(0));
+                }
+                return true;
+            }
+            else
+            {
+                m_lastError = std::shared_ptr<OrmError>(new OrmError(DatabaseError, QString("An error occurred during the select of values in the database. See the sqlerror attached."), query->lastError()));
+                return false;
+            }
+        }
+
+        template<class T>
+        bool selectValueList(QList<QVariant> &list, const QString &field,
+                             const QList<QPair<QString, OrderBy>> orderby, int limit=-1, int offset=0)
+        {
+            return selectValueList<T>(list, field, Where(), orderby, limit, offset);
+        }
+
+        template<class T>
+        bool selectValueList(QList<QVariant> &list, const QString &field,
+                             int limit, int offset=0)
+        {
+            return selectValueList<T>(list, field, QList<QPair<QString, OrderBy>>(), limit, offset);
+        }
+
+        template<class T>
+        bool selectValueList(QList<QVariant> &list, const QString &field, const Where &where,
+                             int limit, int offset=0)
+        {
+            return selectValueList<T>(list, field, where, QList<QPair<QString, OrderBy>>(), limit, offset);
+        }
+
 
         /**
          * Open a transaction in the database connection.
@@ -416,6 +484,16 @@ namespace Orm4Qt
                 m_lastError = std::shared_ptr<OrmError>(new OrmError(ErrorType::DatabaseError, QString("An error occurred while rollback the transaction. See the sql error attached."), db.lastError()));
                 return false;
             }
+        }
+
+        /**
+         * Return the name of the database connection used by this repository.
+         * @return
+         * The current database connection name.
+         */
+        QString databaseConnectionName() const
+        {
+            return m_provider->databaseConnectionName();
         }
 
     private:

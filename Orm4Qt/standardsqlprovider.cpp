@@ -387,6 +387,7 @@ std::shared_ptr<QSqlQuery> StandardSqlProvider::generateSelect(Class *reflect, c
         //Init the where clause
         QString wherestr = "WHERE ";
         const Where *whereptr = &where;
+        int fieldDiff = 0; //Sufix inserted in the property name before adding it in the where clause
         //Iterating over the where clauses joined
         while(whereptr)
         {
@@ -430,9 +431,12 @@ std::shared_ptr<QSqlQuery> StandardSqlProvider::generateSelect(Class *reflect, c
                 wherestr += field + " ";
             }
 
+            //Include the sufix in the name of the property
+            field.append(QString("%1").arg(fieldDiff));
+            ++fieldDiff;
             //Prepare the field to be used as a placeholder
             field.prepend(":");
-            //Char used to diff multiple arguments
+            //Char used to diff multiple arguments in the in and notin comparisons
             char diff = 'a';
             //Check the type of operation
             switch(whereptr->operation())
@@ -625,6 +629,7 @@ std::shared_ptr<QSqlQuery> StandardSqlProvider::generateCount(Class *reflect, co
         //Init the where clause
         QString wherestr = "WHERE ";
         const Where *whereptr = &where;
+        int fieldDiff = 0; //Sufix inserted in the property name before adding it in the where clause
         //Iterating over the where clauses joined
         while(whereptr)
         {
@@ -667,6 +672,8 @@ std::shared_ptr<QSqlQuery> StandardSqlProvider::generateCount(Class *reflect, co
                 wherestr += field + " ";
             }
 
+            //Inserting the sufix in the name of the property
+            field.append(QString("%1").arg(fieldDiff++));
             //Prepare the field to be used as a placeholder
             field.prepend(":");
             //Char used to diff multiple arguments
