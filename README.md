@@ -1,48 +1,29 @@
-###########################################################################
-##			                    Description					                         ##
-###########################################################################
+# ORM4QT - An object relational mapping library writen in C++ for the Qt framework
 
-ORM4QT - An object relational mapping library writen in C++ for the Qt framework.
+## Description
 
-It is capable of automate the tasks of insert, update, delete and search 
-of registers related with the objects of the object oriented context of the C++
-language.
+This is a simple ORM library designed to be used with the Qt Framework. 
+Using it, we can do tasks like insert, update, delete and search objects in the database in a much easier form.
 
-In its actual state the library is only capable of mapping simple classes, without
-relations.
+The library is still incomplete. I started developing it as my final graduate work.
+In its actual state, the library can map simple classes, without relations. All the types supported by Qt (aka QVariant supported types) are also supported here. The library is working in the RDBMSs Sqlite and PostgreSQL.
 
-There isn't support for mapping of:
-- Inheritance
-- Relations one to many
-- Relations many to one
-- Relations one to one
-- Relations many to many
+The library also suport implicit ids, version control (using a version column while updating and deleting of registers) and transactions.
 
-The library uses an own reflection mechanism, that is configured through the use
-of macros that simulate the annotations environment of other languages, for example
-Java and C#.
+I only tested the library with Qt 5.1 and newer versions, but I believe it will work with Qt 4.8 too (I'll test soon).
 
-To realize the communication with the RDBMSs it is used the QtSQL module of the 
-Qt framework. 
+## How it works
 
-The annotations system permits the use of implicit ids and version control during 
-the update and delete of registers. It also permits the use of transactions.
+The library has a custom reflection mechanism, inspired by the Qt Meta-Object system.
+This mechanism is configured using macros that simulates the annotations environment of other languages, like Java and C#.
 
-The library is testing in the RDBMS Sqlite and PostgreSQL.
+Behind the scenes, the macros build a special function that creates a series of lambda expressions that exposes the internal attributes of the mapped class. In that way we can access this attributes from outside of the class to build the sql expressions.
 
-###########################################################################
-##			                Restrictions of use                     				 ##
-###########################################################################
+This lambda expressions are not used directly. They are wraped in a special class that stores meta information about the mapping, like column name, required or not, etc.
 
-For the correct use of the library the mapped classes must have a default
-constructor and a copy constructor. If the default copy constructor can't be 
-used, so you have to use the COPYTAGS() in its implementation.
+For communication with RDMSs we use the QtSql module.
 
-ExampleClass::ExampleClass(const ExampleClass &other) : COPYTAGS(other) {}
-
-##############################################################################
-##			            Format of the SQL Instructions      	            	    ##
-##############################################################################
+## SQL statements Format
 
 Insert:
 	INSERT INTO TABLE ([field1], [field2], ..., [version]) VALUES ([value1], [value2], ..., [0])
@@ -56,11 +37,21 @@ Delete:
 Select:
 	SELECT [field1], [field2], ..., [version], [autoid] FROM TABLE [WHERE CONDITIONS] [ORDER BY ORDERBYLIST] [LIMIT number OFFSET number]
 
-###############################################################################
-##			                        More information                				     ##
-###############################################################################
+## How to use
 
 See the examples project.
+I will add more documentation soon.
+
+## TODOS
+
+- Support inheritance
+- Support relations one to many
+- Support relations many to one
+- Support relations one to one
+- Support relations many to many
+- Add a cache system
+- Add support for MySQL
+- Create a global repository of meta-informations (performance increase)
 
 Contact:
 micdoug.silva@gmail.com
