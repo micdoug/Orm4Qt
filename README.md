@@ -8,7 +8,7 @@ Using it, we can do tasks like insert, update, delete and search objects in the 
 The library is still incomplete. I started developing it as my final graduate work.
 In its actual state, the library can map simple classes, without relations. All the types supported by Qt (aka QVariant supported types) are also supported here. The library is working in the RDBMSs Sqlite and PostgreSQL.
 
-The library also suport implicit ids, version control (using a version column while updating and deleting of registers) and transactions.
+The library also support implicit ids, version control (using a version column while updating and deleting registers) and transactions.
 
 I only tested the library with Qt 5.1 and newer versions, but I believe it will work with Qt 4.8 too (I'll test soon).
 
